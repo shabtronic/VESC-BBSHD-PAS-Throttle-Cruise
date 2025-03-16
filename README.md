@@ -12,7 +12,7 @@ You'll need to upload these two files to your VESC controller:
 
 - PasThrottleCruise.lisp - calculated the pedal RPM and pedal Count.
 
-- PasThrottleCruise.qml - reads the pedal count and exectues a really simple PAS system.
+- PasThrottleCruise.qml -  The main app which reads the pedal count and exectues a really simple PAS system.
 
 It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pedal backwards to decrease the speed.
 
