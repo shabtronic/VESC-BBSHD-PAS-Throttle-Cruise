@@ -8,10 +8,11 @@ Pas sensors are connected to RX and TX.
 
 My brakes are simple switches rather than pots - so a 10k resistor from 3.3v connect to adc2 to make it work properly.
 
+You'll need to upload these two files to your VESC controller:
 
-PasThrottleCruise.lisp - calculated the pedal RPM and pedal Count.
+  PasThrottleCruise.lisp - calculated the pedal RPM and pedal Count.
 
-PasThrottleCruise.qml - reads the pedal count and exectues a really simple PAS system.
+  PasThrottleCruise.qml - reads the pedal count and exectues a really simple PAS system.
 
 It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pedal backwards to decrease the speed.
 
