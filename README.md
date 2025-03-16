@@ -6,7 +6,7 @@ Simple PAS system for VESC BBSHD.
 
 Pas sensors are connected to RX and TX.
 
-My brakes are simple switches rather than pots - so a 10k resistor from 3.3v connect to adc2 to make it work properly.
+My brakes are simple switches rather than pots - so a 10k resistor from 3.3v connected to adc2 to make it work properly.
 
 You'll need to upload these two files to your VESC controller:
 
