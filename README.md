@@ -46,6 +46,8 @@ Panic button STOPS EVERYTHING!
 
 Horn button does nothing - no QML media libs connected.
 
+Gradient Display removed - no QML sensor libs connected.
+
 MPH buttons set the maxium speed
 
 Lock button - locks the app - using the passwords defined
