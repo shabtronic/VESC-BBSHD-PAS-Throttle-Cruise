@@ -3,6 +3,7 @@
 
 Simple PAS system for VESC BBSHD.
 
+This made to remove the need for a throttle (illegal in the UK, or at least "muddy" legality status)
 
 Pas sensors are connected to RX and TX.
 
