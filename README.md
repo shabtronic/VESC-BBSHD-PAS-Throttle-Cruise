@@ -33,7 +33,7 @@ Additional Info->Setup->Wheel diameter
 
 Ap settings->general->Kill Switch mode.
 
-## Brief UI discription
+## Brief UI description
 
 The top two big MPH labels are target speed and actual speed.
 
