@@ -17,6 +17,8 @@ You'll need to upload these two files to your VESC controller:
 
 It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pedal backwards to decrease the speed.
 
+Braking will stop everything and reset the target speed to 0.
+
 ## Status: In progress 
 
 Currently fine tunning and testing. Trying to work out some smooth values e.t.c.
