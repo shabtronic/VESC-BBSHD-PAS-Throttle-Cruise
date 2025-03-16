@@ -1,4 +1,4 @@
-# PAS Throttle Cruise #
+# PAS Throttle Cruise
 
 
 Simple PAS system for VESC BBSHD.
@@ -18,5 +18,22 @@ It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pe
 Status: In progress - fine tunning and testing. Absolutely do not use this out on the road.
 
 The top two big MPH labels are target speed and actual speed.
+
+Aceel is how fast the erpm will get up to the target speed.
+
+The pedal to start slider - is how fast/slow the target speed will increment/decrement.
+
+You need to setup a kill switch in the main vesc tool app settings->general->Kill Switch mode.
+
+You'll also need to setup your BBSHD properly for this to work.
+
+## Some important settings include:
+
+PID Controllers->Minimum ERPM
+
+PID Controllers->Ramp eRPMs per second
+
+Additional Info->Setup->Wheel diameter
+
 
 ![](./Images/MainApp.png)
