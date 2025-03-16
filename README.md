@@ -15,7 +15,11 @@ PasThrottleCruise.qml - reads the pedal count and exectues a really simple PAS s
 
 It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pedal backwards to decrease the speed.
 
-Status: In progress - fine tunning and testing. Absolutely do not use this out on the road.
+## Status: In progress 
+
+fine tunning and testing. 
+
+___Absolutely do not use this out on the road.___
 
 The top two big MPH labels are target speed and actual speed.
 
