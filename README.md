@@ -21,6 +21,8 @@ It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pe
 
 Currently fine tunning and testing. Trying to work out some smooth values e.t.c.
 
+Testing to see if MPH and Battery estimator are correct.
+
 ___Absolutely do not use this out on the road.___
 
 You'll also need to setup your BBSHD properly for this to work.
