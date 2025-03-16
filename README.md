@@ -46,4 +46,10 @@ Panic button STOPS EVERYTHING!
 
 Horn button does nothing - no QML media libs connected.
 
+MPH buttons set the maxium speed
+
+Lock button - locks the app - using the passwords defined
+
+passwordextra unlocks more speed buttons.
+
 ![](./Images/MainApp.png)
