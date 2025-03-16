@@ -38,7 +38,7 @@ App settings->general->Kill Switch mode.
 
 The top two big MPH labels are target speed and actual speed.
 
-Acel is how fast the erpm will get up to the target speed. (done with a 6db lpf)
+Accel is how fast the erpm will get up to the target speed. (done with a 6db lpf)
 
 The pedal to start slider - is how fast/slow the target speed will increment/decrement as you pedal.
 
