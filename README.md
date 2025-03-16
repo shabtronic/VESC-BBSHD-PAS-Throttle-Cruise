@@ -17,7 +17,6 @@ It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pe
 
 Status: In progress - fine tunning and testing. Absolutely do not use this out on the road.
 
-MPH 1) is the target speed
-MPH 2) is the actual speed
+The top two big MPH labels are target speed and actual speed.
 
 ![](./Images/MainApp.png)
