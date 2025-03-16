@@ -40,7 +40,7 @@ The top two big MPH labels are target speed and actual speed.
 
 Aceel is how fast the erpm will get up to the target speed. (done with a 6db lpf)
 
-The pedal to start slider - is how fast/slow the target speed will increment/decrement.
+The pedal to start slider - is how fast/slow the target speed will increment/decrement as you pedal.
 
 Panic button STOPS EVERYTHING!
 
