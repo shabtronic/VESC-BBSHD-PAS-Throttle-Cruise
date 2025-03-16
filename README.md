@@ -43,7 +43,7 @@ The top two big MPH labels are target speed and actual speed.
 
 Accel is how fast the erpm will get up to the target speed. (done with a 6db lpf)
 
-The pedal to start slider - is how fast/slow the target speed will increment/decrement as you pedal. ___Caution do not change while the motor is running___
+The pedal to start slider - is how fast/slow the target speed will increment/decrement as you pedal. ___Caution do not change while the motor is running___ This can potentially change your speed drastically and instantly.
 
 Panic button STOPS EVERYTHING!
 
