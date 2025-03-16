@@ -17,17 +17,9 @@ It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pe
 
 ## Status: In progress 
 
-fine tunning and testing. 
+Currently fine tunning and testing. Trying to work out some smooth values e.t.c.
 
 ___Absolutely do not use this out on the road.___
-
-The top two big MPH labels are target speed and actual speed.
-
-Aceel is how fast the erpm will get up to the target speed.
-
-The pedal to start slider - is how fast/slow the target speed will increment/decrement.
-
-You need to setup a kill switch in the main vesc tool app settings->general->Kill Switch mode.
 
 You'll also need to setup your BBSHD properly for this to work.
 
@@ -39,5 +31,14 @@ PID Controllers->Ramp eRPMs per second
 
 Additional Info->Setup->Wheel diameter
 
+Ap settings->general->Kill Switch mode.
+
+## Brief UI discription
+
+The top two big MPH labels are target speed and actual speed.
+
+Aceel is how fast the erpm will get up to the target speed.
+
+The pedal to start slider - is how fast/slow the target speed will increment/decrement.
 
 ![](./Images/MainApp.png)
