@@ -3,7 +3,7 @@
 
 Simple PAS system for a VESC controller and a BBSHD motor. Developed using a Flipsky 75100 and VESC 6.05 firmware and tool.
 
-This made to remove the need for a throttle (illegal in the UK, or at least "muddy" legality status)
+This was made to remove the need for a throttle (illegal in the UK, or at least "muddy" legality status)
 
 Pas sensors are connected to RX and TX.
 
