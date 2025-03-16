@@ -31,7 +31,7 @@ PID Controllers->Ramp eRPMs per second
 
 Additional Info->Setup->Wheel diameter
 
-Ap settings->general->Kill Switch mode.
+App settings->general->Kill Switch mode.
 
 ## Brief UI description
 
