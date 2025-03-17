@@ -1,4 +1,4 @@
-# PAS Throttle Cruise
+# VESC-BBSHD PAS Throttle Cruise
 
 
 Simple PAS system for a VESC controller and a BBSHD motor. Developed using a Flipsky 75100 and VESC 6.05 firmware and tool.
