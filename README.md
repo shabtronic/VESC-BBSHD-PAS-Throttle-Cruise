@@ -25,7 +25,7 @@ Currently fine tunning and testing. Trying to work out some smooth values e.t.c.
 
 Testing to see if MPH and Battery estimator are correct.
 
-___Absolutely do not use this out on the road.___
+#___Absolutely do not use this out on the road.___
 
 Playing around with glES shaders - fun fun fun!
 
