@@ -2,9 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
-//import QtSensors 5.0
-//import Sensors 1.0
-//import QtMultimedia 4.0
+
 import Vedder.vesc.utility 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
@@ -12,74 +10,8 @@ import Vedder.vesc.configparams 1.0
 // PAS Throttle Cruise UI
 //
 // (C) 2025 S.D.Smith all rights reserved
-//
-// *CAUTION* I class this as "LIFE CRITICAL" code so use at your *OWN* risk -
-// I accept no liablility for any damage or injury incured using this software.
-// Only use this is if you *KNOW* what your are doing, and have done plenty of "bench" testing
-// ("bench" testing - meaning wheels off ground or chain removed so your bike can't move)
-
-// This has only been tested on a BBSHD with a Flipsky 75100
-// the BBSHD is a very powerful motor up to 4kw with the right settings - so you need to be
-// very very careful with it.
-// You need to have setup your BBSHD correctly - and that's a whole other chunk of knowledge
-// not discussed here.
-
-// If your motor settings are not correct - this script may fail to stop your motor when setRPM(0) is called!
-
-// You need to "upload" PasThrottleCruise.lisp to your vesc controller for this to work
-// that lisp script calculates the pedalRPM and pedalCount and sends it to this QML script
-
-// You need to upload this QML script to your vesc controller
-// You need to hit the bin button on the (main) script window - then load this script
-// then on the bottom part of the screen "Tools"->Erase and Upload
-
-// You need to set "App Settings"->"General"->"App to use" to CUSTOM_USER_APP
-
-// Because Brakes are so important for this kind of Cruise system
-// the App has a brake "test" at the start and will not continue unless the brakes are pressed
-// You *MUST* setup the brakes manually - else this system will potentially not switch off!!
-// You need to set "App Settings"->"General"->"Kill switch mode" - to whatever your brakes are wired up as
-// Test this by hitting the brakes while this qml is running - a Group box will appear with "Braking" in red text!
-
-// Usage:
-//
-// 1) This is a PAS Throttle Cruise system, you pedal forwards to start the motor
-// 2) The motor will only start if the pedal RPM is above the pedal Thresh set with the slider
-// 2) The motor will speed up to the TargetSpeed you've set (10,12 or 15mph)
-// 4) The motor will accelerate to the TargetSpeed (in MPH increase per second) you've set with the Accel slider and set button
-// 5) While the motor is running if you pedal forwards above the pedalThresh the TargetSpeed will increase by a small amount
-// 6) While the motor is running if you pedal backward above the pedalThresh the TargetSpeed will decrease
-// 7) The motor will stop if you hit the brakes (and have them wired up correctly and set the app settings correctly)
-// 8) The motor will stop if you hit the "PANIC" button
-// 9) The motor will stop if you shut down the app
-// 10) The lock button will only work if the RPM is 0
-// 11) If you press any of the 10mph,12mph,15mph buttons while the motor is running
-//     the motor will accel/decel to that speed
-// 12) The motor will stop if you stop pedalling (pedalRPM<=0.5) - unless the "Cruise" toggle is on
-
-
-// Press the lock button to shutdown the motor and turn off the UI
-// Enter password defined below to display the UI
-
-// BBSHD has 8 magnets
-// 21.9 internal gear ratio
-// 28t(crank)/32t(rear wheel)) external gear ratio
-
-// Sliders Buttons and Toggles are all separated vertically as much as possible for safety
-// You don't want them close together and accidentally press the wrong thing
-// which can and does happen with touch screens while riding!
-
-// While the fantastic Gauges and Dials in the vesc app look really great,
-// On a android phone there's not much screen estate - so I've opted for a
-// Easy to read Text display UI whilst riding.
 
 Item {
-    // SDS - sadly no meida libs for the Android vesc app :(
-    //SoundEffect
-    //{
-    //    id: playSound
-    //    source: "soundeffect.wav"
-    //}
 
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
@@ -97,10 +29,9 @@ Item {
         console.log(testspeed.toFixed(1)+" mph to erpm to mph: "+convERPMtoMPH(convMPHtoERPM(testspeed)).toFixed(0))
     }
 
-    // SDS - various Globals
-    // Gear ratios - crank and wheel are teeth counts
-    // motor ratio is the internal gearing on the BBSHD
-    // These are all used to convert ERPM to MPH e.t.c.
+    property var drawshaders:true
+    property var shadertime:0
+    property var param1:0
 
     property var motormagnets: 8
     property var motorratio: 21.9
@@ -108,27 +39,21 @@ Item {
     property var wheelgear: 32
     property var gearRatio: (motormagnets*motorratio*wheelgear/crankgear) // convert to and from ERPM/MPH
 
-    // We actually read this from the vesc mcConf - so this setting gets overwritten
-    // makes it easer to change tyres/wheels without having to change src code e.t.c.
     property var wheelDiameter: 28.5 // inches - fat bike 26" + stupidly big tyres = 28.5"!!
 
     property var incrementalCruise: true; // enable/disable cruise
-
 
     // Change to whatever you like!
     property var password : "353838"
     // unlock "extra speeds"
     property var passwordextra : "353538"
 
-    property var componentsVisible: false // set to false for brake test
+    property var componentsVisible: true // set to false for brake test
     property var passwordVisible: false
     property var extrasVisible: false
-    property var errorVisible: true // set to true for brake test
-    property var brakesTested: false // set to false for brake test
-
-
-    // Safety - test the brakes - before allowing app to run
-
+    property var errorVisible: false // set to true for brake test
+    property var brakesTested: true // set to false for brake test
+    property var pedallabelVisible: true
     // Various
     property var totalTime: 0 // main trip time
     property var motorRPM: 0
@@ -144,7 +69,6 @@ Item {
     // Trip values
     property var distTravelled: 0
 
-
     // Lisp PAS vars
     property var pasPedalRPM:0
     property var pasPedalCount:0
@@ -154,11 +78,18 @@ Item {
     property var actualERPM: 0
     property var pedalStatic:-1000000
 
+    function curveMap(param)
+    {
+        if (param<0) param=0;
+        if (param>1) param=1;
+        return Math.tanh(Math.PI*(param*2-1))*0.5+0.5;
+    }
     function updateMotor()
     {
-        actualERPM+=(targetERPM-actualERPM)*accelSlider.value;
-        if (actualERPM>0 && actualERPM<70000)
-        mCommands.setRpm(actualERPM)
+        // SDS - simple 6db lpf - probably the wrong thing to use
+        actualERPM+=(targetERPM-actualERPM)*0.9;
+        if (actualERPM>=0 && actualERPM<70000)
+           mCommands.setRpm(Math.round(actualERPM))
     }
 
     // SDS Various conversion functions
@@ -203,7 +134,6 @@ Item {
  // comms handlers for data from vesc/lisp
  Connections
  {
-
  property Commands mCommands: VescIf.commands()
  property ConfigParams mMcConf: VescIf.mcConfig()
  target: mCommands
@@ -217,7 +147,13 @@ Item {
    var paspc2=dv.getUint8(2)
    var paspc3=dv.getUint8(3)
    pasPedalCount= (paspc1+(paspc2*256)+(paspc3*256*256))-(256*256*256/2)
-   if (!bikeLocked && brakesTested==true)
+
+        // Extend out the turns for higher max speeds
+        var baselineratio=maxMPH/10
+        // calculate pedal count for max speed
+        var fullthrottle=(5*96*baselineratio)/accelSlider.value
+
+        if (!bikeLocked && brakesTested==true)
         {
         // Calculate target speed from pedalcount
         if (pedalStatic==-1000000)
@@ -225,52 +161,64 @@ Item {
         var pedalDelta=0;
         if (pedalStatic!=-1000000)
             {
-            pedalDelta= (pasPedalCount-pedalStatic)/500*10;
+            pedalDelta= (pasPedalCount-pedalStatic)/fullthrottle;
             if (pedalDelta<0)
                 {
                 pedalDelta=0;
                 pedalStatic=pasPedalCount
                 }
-            if (pedalDelta>maxMPH)
+            if (pedalDelta>1)
                 {
-                pedalDelta=maxMPH;
-                pedalStatic=pasPedalCount-(pedalDelta*500/10)
+                pedalDelta=1;
+                pedalStatic=pasPedalCount-(fullthrottle)
                 }
-            targetERPM=convMPHtoERPM(pedalDelta*speedmulSlider.value)
+            // SDS - much simpler and smoother accel curve
+            param1=pedalDelta;
+            var mph=curveMap(pedalDelta)*(maxMPH-0.75);
+            if (mph<=0.05)mph=0;
+            if (mph>0.05) mph+=0.75;
+           if (pedalDelta>0)
+            pedallabelVisible=false
+            else
+            pedallabelVisible=true
+            targetERPM=convMPHtoERPM(mph)
             }
             else
             {
             pedalDelta=0;
             }
 
-    //pedalLabel.text= "Delta "+(pedalDelta).toFixed(1)+" MPH"
-    targetLabel.text=convERPMtoMPH(targetERPM).toFixed(1)+"  MPH"
+     pedalLabel.text= "Delta "+(pedalDelta).toFixed(3)+" MPH"
+     targetLabel.text=convERPMtoMPH(targetERPM).toFixed(1)+"  <MPH>"
      // Turn off the motor if pedal RPM less than 1 and Cruise isn't switched on
      if (Math.abs(pasPedalRPM)<1 && !cruiseToggle.checked)
         {
         if (motorRPM>0)
             {
-            console.log("Setting RPM3 to:0")
+            targetERPM=0;
+            actualERPM=0;
             mCommands.setRpm(0)
-            console.log("Setting RPM to: 0")
             }
         }
      }
  }
 
- // SDS - generic motor values updated in realtime
- // this is called every mainTimer.interval ms
  function onValuesReceived(values, mask)
     {
     // Update info from vesc
     motorRPM=values.rpm
-    if (motorRPM>0)
-        lockButton.visible=false
-        else
-        lockButton.visible=true
 
-    if (motorRPM>0)
+    if (motorRPM>1)
+        {
         motorTime+=mainTimer.interval/1000
+        accelSlider.enabled=false;
+        lockButton.enabled=false;
+        }
+    else
+        {
+        accelSlider.enabled=true;
+        lockButton.enabled=true;
+        }
 
     speedLabel.text=Math.abs(convERPMtoMPH(motorRPM)).toFixed(1)+" MPH"
     rpmLabel.text="ERPM: "+values.rpm.toFixed(1)
@@ -325,6 +273,7 @@ Item {
     // Display Fault code
     if (values.fault_str!="FAULT_CODE_NONE")
         {
+        errorLabel.color="#ffff00"
         errorLabel.text=values.fault_str;
         errorVisible=true;
         }
@@ -338,7 +287,6 @@ Item {
     minBattery=mMcConf.getParamDouble("l_min_vin")
     maxBattery=mMcConf.getParamDouble("l_max_vin")
     maxBattery=84 // Hardcode for more accurate readings
-    console.log("onValuesSetupReceived called! "+minBattery+"v "+maxBattery+"v "+wheelDiameter+"inch")
     }
 
  } //connections
@@ -347,7 +295,7 @@ Item {
     anchors.fill: parent
     anchors.margins: 5
     property var bikeLocked:false
-    // SDS - only lock up bike if the RPM is 0!
+
     function lockAPP()
     {
         if (motorRPM==0)
@@ -385,7 +333,6 @@ Item {
                 }
                 else
                 {
-                // SDS - hide the password entry for 30 secs
                 passwordVisible=false;
                 lockTimer.interval = 30000;
                 lockTimer.repeat = false;
@@ -394,9 +341,6 @@ Item {
             passwordField.text=""
             }
         }
-
-    // adds a leading "0" to int to string
-    // used for 00:00:00 trip time formatting
 
     function fmtstr(x)
         {
@@ -409,13 +353,12 @@ Item {
 
     function changeMaxSpeed(newSpeed)
         {
+        if (newSpeed>30) newSpeed=30;
+        if (newSpeed<6) newSpeed=6;
         maxMPH=newSpeed
-
+        // pedalStatic=pasPedalCount
         }
 
-
-    // ********************************** Timers *********************************************************
-    // hides the main UI for 30 secs if password is wrong
     Timer
     {
         id: lockTimer
@@ -429,47 +372,20 @@ Item {
         }
     }
 
-    // Silly "pedal to start" text animation
-    Timer
-    {
-        id: animTimer
-        repeat: true;
-        interval: 150
-        running: true
-        property var anim: 0
-        onTriggered: {
-
-        if (motorRPM<=0)
-        {
-        if (anim==0)       statusLabel.text="<<Pedal to Start>>"
-        if (anim==1)       statusLabel.text="<< Pedal to Start >>"
-        if (anim==2)       statusLabel.text="<<  Pedal to Start  >>"
-        if (anim==3)       statusLabel.text="<<   Pedal to Start   >>"
-        if (anim==4)       statusLabel.text="<<    Pedal to Start    >>"
-        if (anim==5)       statusLabel.text="<<     Pedal to Start     >>"
-        }
-        else
-         statusLabel.text="";
-        anim=(anim+1)%6;
-        }
-    }
 
     Timer {
         id: mainTimer
-        interval: 50 // 20hz
+        interval: 16 // 60hz
         repeat: true
         running: true
 
         onTriggered:
         {
-        // SDS - trigger the send values to OnValuesReceived
+        shadertime+=1.0/interval;
         mCommands.getValues()
-        // SDS - kick the motor watchDawg so the motor wont shutdown
         mCommands.sendAlive()
         if (!bikeLocked && brakesTested)
             updateMotor()
-
-        // Update Trip Time
         if (!bikeLocked)
             {
             totalTime=totalTime+interval/1000
@@ -478,6 +394,12 @@ Item {
        }
     }
 
+    Rectangle
+    {
+        id: background
+        anchors.fill: parent
+        color: "#202020"
+    }
 
 
     ColumnLayout
@@ -486,7 +408,6 @@ Item {
         anchors.fill: parent
 
         // **********************PASSWORD UI***************************************
-
         RowLayout
         {
         Layout.fillHeight: true
@@ -517,6 +438,7 @@ Item {
             validator: IntValidator {bottom: 1; top: 999999}
             font.pointSize : 30
             onAccepted: _onEnterPressed()
+
             }
         }
 
@@ -525,6 +447,21 @@ Item {
         GroupBox {
         Layout.fillWidth: true
         visible : componentsVisible
+        background:Rectangle
+                    {
+                    opacity: 1/257
+                    ShaderEffect
+                    {
+                    width: parent.width
+                    height: parent.height
+                    property var source: parent
+                    property var time: shadertime // update shadertime in a timer
+                    property var resx : parent.width
+                    property var resy : parent.height
+                    visible: drawshaders
+                    fragmentShader: roundrectvgrad
+                    }
+                    }
         ColumnLayout
         {
         anchors.fill: parent
@@ -536,13 +473,12 @@ Item {
                 {
                 Layout.fillWidth: true
                 text: "Horn"
-                onClicked: // SDS - no media libs :(
+                onClicked:
                     {
-                    //myPlayer.play();
                     }
         }
 
-        Switch // Cruise Toggle button
+        Switch
         {
             id: cruiseToggle
             text: "Auto"
@@ -554,22 +490,56 @@ Item {
         {
             Layout.fillWidth: true
             text: "Panic"
+            font.pointSize : 20
             onClicked:
             {
             targetERPM=0;
             actualERPM=0;
             pedalStatic=pasPedalCount
             mCommands.setRpm(0)
+            console.log("Panic pressed!")
             }
+        background:Rectangle
+            {
+            opacity: 1/257
+            ShaderEffect
+                {
+                width: parent.width
+                height: parent.height
+                property var source: parent
+                property var time: shadertime
+                property var resx : parent.width
+                property var resy : parent.height
+                visible: drawshaders
+                fragmentShader: hypnoshader
+                }
+        }
         }
         }
         }
         }
 // ******************************* Main speedo mph and Accel slider ***************************************
         GroupBox {
+        id:mainbox
         Layout.fillWidth: true
         Layout.fillHeight: true
-         visible : componentsVisible
+        visible : componentsVisible
+        // SDS - coz shaders are important! :)
+        background:Rectangle
+        {
+        opacity: 1/257
+        ShaderEffect
+            {
+            width: parent.width
+            height: parent.height
+            property var source: parent
+            property var time: shadertime // update shadertime in a timer
+            property var resx : parent.width
+            property var resy : parent.height
+            visible: drawshaders
+            fragmentShader: roundrectvgrad
+            }
+        }
         ColumnLayout
         {
         anchors.fill: parent
@@ -618,23 +588,25 @@ Item {
         {
         Layout.fillHeight: true
         Layout.fillWidth: true
-        // s_pid_ramp_erpms_s set to 5331
-
         Slider
             {
             handle.implicitHeight: 34
             handle.implicitWidth: 44
             id:accelSlider
             Layout.fillWidth: true
-            from: 0.01
-            to: 0.35
-            value: 0.1
-            onValueChanged: sliderLabel.text="Accel "+value.toFixed(2)
+            from: 0
+            to: 2
+            value: 1
+            onValueChanged:
+            {
+            pedalStatic=pasPedalCount
+            sliderLabel.text="Accel "+value.toFixed(2)
+            }
             }
         Label
             {
             id :sliderLabel
-            text: "Accel 0.10"
+            text: "Accel 1.00"
             font.pointSize : 20
             }
         }
@@ -642,11 +614,25 @@ Item {
 }
 
 // *************************** Error Status ********************************
-
 GroupBox {
         Layout.fillWidth: true
         Layout.fillHeight: true
         visible : (errorVisible)// && componentsVisible)
+        background:Rectangle
+                    {
+                    opacity: 1/257
+                    ShaderEffect
+                    {
+                    width: parent.width
+                    height: parent.height
+                    property var source: parent
+                    property var time: shadertime // update shadertime in a timer
+                    property var resx : parent.width
+                    property var resy : parent.height
+                    visible: drawshaders
+                    fragmentShader: hypnoshader
+                    }
+                    }
         ColumnLayout
         {
         anchors.fill: parent
@@ -672,6 +658,21 @@ GroupBox {
         Layout.fillWidth: true
         Layout.fillHeight: true
         visible : componentsVisible
+                background:Rectangle
+        {
+        opacity: 1/257
+        ShaderEffect
+            {
+            width: parent.width
+            height: parent.height
+            property var source: parent
+            property var time: shadertime // update shadertime in a timer
+            property var resx : parent.width
+            property var resy : parent.height
+            visible: drawshaders
+            fragmentShader: roundrectvgrad
+            }
+        }
         ColumnLayout
         {
         anchors.fill: parent
@@ -685,11 +686,27 @@ GroupBox {
                 horizontalAlignment: Text.AlignHCenter
                 id :statusLabel
                 color: "#FFffC0"
-                text: "<<Pedal to Start>>"
+                text: "       Pedal to Start       "
                 font.pointSize : 20
+                visible: componentsVisible && pedallabelVisible
+                background:Rectangle
+                    {
+                    opacity: 1/257
+                    ShaderEffect
+                    {
+                    width: parent.width
+                    height: parent.height
+                    property var source: parent
+                    property var time: shadertime // update shadertime in a timer
+                    property var resx : parent.width
+                    property var resy : parent.height
+                    visible: drawshaders
+                    fragmentShader: hscanner
+                    }
+            }
                 }
         }
-        /*
+
         RowLayout
         {
         Layout.fillHeight: true
@@ -703,43 +720,31 @@ GroupBox {
                 font.pointSize : 20
                 }
         }
-        */
-
-
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Slider
-            {
-            handle.implicitHeight: 34
-            handle.implicitWidth: 44
-            id:speedmulSlider
-            Layout.fillWidth: true
-            from: 0.5
-            to: 2
-            value: 1
-            onValueChanged:
-                    {
-                    rpmsliderLabel.text="x "+value.toFixed(2)
-                    }
-            }
-        Label
-            {
-            id :rpmsliderLabel
-            text:"x "+speedmulSlider.value.toFixed(2)
-            font.pointSize : 20
-            }
-        }
     }
 }
 
 // *********************************** Trip Info ******************************************
-
         GroupBox {
         Layout.fillWidth: true
         Layout.fillHeight: true
          visible : componentsVisible
+        background:Rectangle
+        {
+        opacity: 1/257
+        ShaderEffect
+            {
+            width: parent.width
+            height: parent.height
+            property var source: parent
+            property var time: shadertime // update shadertime in a timer
+            property var resx : parent.width
+            property var resy : parent.height
+            property var startcol: Qt.vector3d(0,0,0)
+            property var endcol: Qt.vector3d(0,0,0.3)
+            visible: drawshaders
+            fragmentShader: roundrectvgrad
+            }
+        }
         ColumnLayout
         {
         anchors.fill: parent
@@ -790,8 +795,6 @@ GroupBox {
 }
 }
 // ************************* Speed/Lock Buttons ******************************************
-
-
         RowLayout
         {
 
@@ -800,6 +803,7 @@ GroupBox {
             {
                 Layout.fillWidth: true
                 id: b1
+                font.pointSize : 20
                 text: "6mph" // Unicode Character 'CHECK MARK'
                 onClicked:
                     {
@@ -811,6 +815,7 @@ GroupBox {
             Button
             {
                 id:b2
+                font.pointSize : 20
                 Material.background: "#008f00"
                 Layout.fillWidth: true
                 text: "10MPH"
@@ -823,6 +828,7 @@ GroupBox {
             Button
             {
             id:b3
+            font.pointSize : 20
                 Layout.fillWidth: true
                 text: "12mph"
                 onClicked:
@@ -834,6 +840,7 @@ GroupBox {
             Button
             {
             id:b4
+            font.pointSize : 20
                 Layout.fillWidth: true
                 text: "15mph"
                 onClicked:
@@ -845,32 +852,49 @@ GroupBox {
             Button
             {
             id: lockButton
-                Layout.fillWidth: true
-                text: "Lock"
-                onClicked:  lockAPP()
+            Layout.fillWidth: true
+            text: "Lock"
+            font.pointSize : 20
+            onClicked:  lockAPP()
+
+            background:Rectangle
+            {
+            ShaderEffect
+                {
+                width: parent.width
+                height: parent.height
+                property var source: parent
+                property var time: shadertime // update shadertime in a timer
+                property var resx : width
+                property var resy : height
+                visible: drawshaders
+                fragmentShader: hypnoshader
+                }
+            }
             }
         }
-          RowLayout
+        // passwordExtra buttons
+        RowLayout
         {
-
             visible: componentsVisible && extrasVisible
             Button
             {
                 Layout.fillWidth: true
                 id: b5
-                text: "17mph" // Unicode Character 'CHECK MARK'
+                font.pointSize : 20
+                text: "17mph"
                 onClicked:
                     {
                     changeMaxSpeed(17)
                     buttonActive(5)
                     }
             }
-
             Button
             {
                 id:b6
                 Layout.fillWidth: true
                 text: "18MPH"
+                font.pointSize : 20
                 onClicked:
                 {
                 changeMaxSpeed(18)
@@ -882,6 +906,7 @@ GroupBox {
             id:b7
                 Layout.fillWidth: true
                 text: "20mph"
+                font.pointSize : 20
                 onClicked:
                 {
                 changeMaxSpeed(20)
@@ -893,13 +918,126 @@ GroupBox {
             id:b8
                 Layout.fillWidth: true
                 text: "30mph"
+                font.pointSize : 20
                 onClicked:
                 {
                 changeMaxSpeed(30)
                 buttonActive(8)
                 }
+
             }
 
         }
     }
+
+    Rectangle
+    {
+    x:mainbox.x+mainbox.width-mainbox.width/4.5
+    y:mainbox.y+(mainbox.height-mainbox.width/5)/2
+    width:mainbox.width/5
+    height:width
+    visible: componentsVisible
+    opacity:0.5
+                ShaderEffect
+                {
+                width: parent.width
+                height: parent.height
+                property var source: parent
+                property var time: shadertime
+                property var resx : width
+                property var resy : height
+                property var glparam1:param1
+                visible: true
+                fragmentShader: sigmoid
+                }
+     }
+
+
+
+property var solidcolor: "varying highp vec2 qt_TexCoord0;
+                            uniform highp float time;
+                            void main()
+                            {
+                            gl_FragColor = vec4(0.0,0.0,mod(qt_TexCoord0.y+time,1.0),1.0);
+                            }
+                            "
+property var hypnoshader:   "varying highp vec2 qt_TexCoord0;
+                            uniform highp float time;
+                            uniform highp float resx;
+                            uniform highp float resy;
+                            void main()
+                            {
+                            float t = time/3.0;
+                            vec2 coords = ((qt_TexCoord0) * 2.0 - 1.0)*vec2(resx/resy,1.0)/3.0;
+                            float x = coords.x;
+                            float y = coords.y;
+                            float s = (sin(sqrt(x*x + y*y) * 10.0 - (time * 1.0)) / sqrt(x*x + y*y)) * 0.5 + 0.5;
+                            vec3 color = vec3(x * 0.5 + 0.5, 0.0, (y) * 0.5 + 0.85);
+                            gl_FragColor = vec4(color * s,  1.0);
+                            }"
+
+property var hscanner:   "varying highp vec2 qt_TexCoord0;
+                            uniform highp float time;
+                            uniform highp float resx;
+                            uniform highp float resy;
+                            void main()
+                            {
+                            float t = time;
+                            vec2 coords = ((qt_TexCoord0) * 2.0 - 1.0)*vec2(resx/resy,1.0)/3.0;
+                            float x = coords.x*3.0;
+                            float y = coords.y;
+                            float s = (cos(t)*0.3+0.5);
+                            vec3 color = vec3(0.0);
+                            float cc=1.0-abs(s-qt_TexCoord0.x)/0.2;
+                            cc=cc*(1.0-abs((qt_TexCoord0.y-0.5))*2.0);
+                            if (abs(s-qt_TexCoord0.x)<0.2)
+                            color=vec3(0.0,cc*4.0,cc);
+                            gl_FragColor = vec4(color ,  1.0);
+                            }"
+
+property var roundrectvgrad:"varying highp vec2 qt_TexCoord0;
+                            uniform highp float time;
+                            uniform highp float resx;
+                            uniform highp float resy;
+                            uniform highp vec3 startcol;
+                            uniform highp vec3 endcol;
+                            float sdBox(vec2 p,vec2 b )
+                            {
+                            vec2 d = abs(p)-b;
+                            return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
+                            }
+                            void main()
+                            {
+                            vec2 sspace=(qt_TexCoord0-0.5)*vec2(resx,resy);
+                            float rad=min(min(20.0,resx/2.0),resy/2.0);
+                            float d=-(sdBox(sspace,vec2(resx-rad*2.0,resy-rad*2.0)/2.0)-rad);
+                            float xx=1.0;
+                            float alpha=smoothstep(0.5-xx,0.5+xx,d);
+                            vec3 color = mix(startcol,endcol,qt_TexCoord0.y);
+                            gl_FragColor = vec4(color ,  alpha);
+                            }"
+property var sigmoid: "varying highp vec2 qt_TexCoord0;
+                            uniform highp float time;
+                            uniform highp float glparam1;
+                            uniform highp float resx;
+                            uniform highp float resy;
+                            float tanh(float v)
+                            {
+                            return (exp(v)-exp(-v))/(exp(v)+exp(-v));
+                            }
+                            void main( void )
+                            {
+                            vec2 pos = ( qt_TexCoord0 ) *2.0-1.0;
+                            pos.y=-pos.y;
+                            float color = 0.0;
+                            float dd=abs(tanh(pos.x*3.1415)-pos.y);
+                            float fd=10.0/resx;
+                            color=1.0-smoothstep(0.0-fd,0.0+fd,dd);
+                            color+=0.1;
+                            float tm=mod(time/4.0, 1.0)*2.0-1.0;
+                            vec2 dp=vec2(glparam1*2.0-1.0,tanh((glparam1*2.0-1.0)*3.1415));
+                            float color2=clamp(1.0-length(pos-dp)*4.1, 0.0, 1.0);
+                            gl_FragColor = vec4( vec3(0.2, 0.2, 0.2)* color +vec3(1.0,0.8,0)*color2, 1.0 );
+                            }
+                            "
 }
