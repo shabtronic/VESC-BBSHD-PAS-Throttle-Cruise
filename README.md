@@ -47,7 +47,7 @@ App settings->general->Kill Switch mode. (Mine is set to "ADC2 low")
 
 The top two big MPH labels are target speed and actual speed.
 
-Accel is how fast the erpm will get up to the target speed. (done with a 6db lpf)
+Accel is how many pedal rotations to get to max speed.
 
 Panic button STOPS EVERYTHING!
 
