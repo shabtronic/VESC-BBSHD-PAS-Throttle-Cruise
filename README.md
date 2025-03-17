@@ -51,6 +51,8 @@ Accel is how fast the erpm will get up to the target speed. (done with a 6db lpf
 
 Panic button STOPS EVERYTHING!
 
+The sigmoid curve - shows the parametric position to the max mph set. i.e. the position of the "Virutal Throttle". 
+
 Horn button does nothing - no QML media libs connected.
 
 Gradient Display removed - no QML sensor libs connected.
