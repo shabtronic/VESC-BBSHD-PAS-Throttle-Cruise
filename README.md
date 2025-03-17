@@ -7,7 +7,7 @@ This was made to remove the need for a throttle (illegal in the UK, or at least 
 
 Pas sensors are connected to RX and TX.
 
-My brakes are simple switches rather than pots - so a 10k resistor from 3.3v connected to adc2 and then the brake switch fom ADC2 to gnd - to make it work properly.
+My brakes are simple switches rather than pots - so a 10k resistor from 3.3v connected to adc2 and then the brake switch from ADC2 to gnd - to make it work properly.
 
 You'll need to upload these two files to your VESC controller:
 
