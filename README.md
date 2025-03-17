@@ -27,6 +27,8 @@ Testing to see if MPH and Battery estimator are correct.
 
 ___Absolutely do not use this out on the road.___
 
+Sadly had to remove most comments in code, get the file sizes down so I could upload to vesc flash e.t.c.
+
 You'll also need to setup your BBSHD properly for this to work.
 
 ## Some important settings include:
