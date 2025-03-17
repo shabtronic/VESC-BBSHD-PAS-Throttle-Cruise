@@ -11,15 +11,16 @@ import Vedder.vesc.configparams 1.0
 //
 // (C) 2025 S.D.Smith all rights reserved
 
+// Strictly for educational purposes only.
+// Absolutely do not use this out on the road. Bench testing only!
+// Use at your own *RISK* - The author accepts no liability for any damage or injuries
+// if you use this software.
+
 Item {
 
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
 
-    // 120 pedal rpm = 10 mph
-    // 10 mph = 21024
-
-    // trigger onValuesSetupReceived
     Component.onCompleted:
     {
         mCommands.emitEmptySetupValues()
