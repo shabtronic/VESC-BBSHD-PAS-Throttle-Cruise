@@ -59,4 +59,4 @@ Lock button - locks the app - using the passwords defined.
 
 passwordextra unlocks more speed buttons.
 
-![](./Images/MainApp.png)
+![](./Images/PasThrottleCruiseAnim.gif)
