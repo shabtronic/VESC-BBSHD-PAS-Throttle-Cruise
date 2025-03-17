@@ -2,7 +2,6 @@ import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
-
 import Vedder.vesc.utility 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
@@ -69,11 +68,9 @@ Item {
     property var batteryPercentageStart:0
     // Trip values
     property var distTravelled: 0
-
     // Lisp PAS vars
     property var pasPedalRPM:0
     property var pasPedalCount:0
-
     // main vars for motor control
     property var targetERPM: 0
     property var actualERPM: 0
@@ -109,6 +106,18 @@ Item {
     function convMPHtoERPM(mph)
     {
         return (mph*inchespermile/(wheelDiameter*Math.PI*60.0))*(motormagnets*motorratio*crankgear/wheelgear)
+    }
+
+    function enableButtons(value)
+    {
+        b1.enabled=value;
+        b2.enabled=value;
+        b3.enabled=value;
+        b4.enabled=value;
+        b5.enabled=value;
+        b6.enabled=value;
+        b7.enabled=value;
+        b8.enabled=value;
     }
 
     // Lazy group buttons
@@ -214,11 +223,13 @@ Item {
         motorTime+=mainTimer.interval/1000
         accelSlider.enabled=false;
         lockButton.enabled=false;
+        enableButtons(false);
         }
     else
         {
         accelSlider.enabled=true;
         lockButton.enabled=true;
+        enableButtons(true);
         }
 
     speedLabel.text=Math.abs(convERPMtoMPH(motorRPM)).toFixed(1)+" MPH"
