@@ -35,13 +35,13 @@ You'll also need to setup your BBSHD properly for this to work.
 
 ## Some important settings include:
 
-PID Controllers->Minimum ERPM
+PID Controllers->Minimum ERPM  (Mine is set to 600)
 
-PID Controllers->Ramp eRPMs per second
+PID Controllers->Ramp eRPMs per second (Mine is set to 2500)
 
 Additional Info->Setup->Wheel diameter
 
-App settings->general->Kill Switch mode.
+App settings->general->Kill Switch mode. (Mine is set to "ADC2 low")
 
 ## Brief UI description
 
