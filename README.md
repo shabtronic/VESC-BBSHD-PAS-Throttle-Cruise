@@ -63,4 +63,6 @@ Lock button - locks the app - using the passwords defined.
 
 passwordextra unlocks more speed buttons.
 
+As soon as the motor starts spinning all buttons and sliders are disabled - apart from the "PANIC" button - saftey first!
+
 ![](./Images/PasThrottleCruiseAnim.gif)
