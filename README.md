@@ -14,6 +14,10 @@ You'll need to upload these two files to your VESC controller:
 - PasThrottleCruise.lisp - calculate the pedal RPM and pedal Count.
 
 - PasThrottleCruise.qml -  The main app which reads the pedal count and exectues a really simple PAS system.
+  
+- Then on your android phone when the Vesc app connects - a "App UI" tab will appear with the UI for this system
+
+- Nothing will happen or work if your android Vesc app isn't running and connected to your Vesc controller.
 
 It's a "Virtual Throttle", you pedal forwards to increase the cruise speed or pedal backwards to decrease the speed.
 
