@@ -91,6 +91,6 @@ BBSHD pas sensor seems to have 24 magnets - so with 4x encoder reading that give
 
 # Safety Lecture
 
-The BBSHD is a very powerful motor - if things go wrong it can easily overpower (2.5kw = 3.3HP!) you and pull you into traffic and splat. This system uses PID setRpm() - so it will attempt to match the speed you set - and ramp up the power until it reaches that speed. So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
+The BBSHD is a very powerful motor - if things go wrong it can easily overpower you (2.5kw = 3.3HP!) and pull you into traffic and splat. This system uses PID setRpm() - so it will attempt to match the speed you set - and ramp up the power until it reaches that speed. So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
 
 - if your brake cable disconnects - you can shut off the motor with the panic button or shutdown the app or disconnect the battery.
