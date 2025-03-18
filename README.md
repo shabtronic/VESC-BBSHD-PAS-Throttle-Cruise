@@ -81,7 +81,7 @@ Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I de
 
 # BBSHD
 
-What a superb motor! - built like a tank!! I've ridden 10,000 miles plus over the 5 years I've owned the BBSHD. No problems with it at all - no noises or issues. I gear 28/32 for hill climbing torque and I think that's the key to the BBSHD longvity - it likes to spin fast (all motors do :) ) - and that stops the internal nylon gear from melting!
+What a superb motor! - built like a tank!! I've ridden 10,000 miles plus over the 5 years I've owned the BBSHD. No problems with it at all - no noises or issues. I gear 28/32 for hill climbing torque and I think that's the key to the BBSHD longevity - it likes to spin fast (all motors do :) ) - and that stops the internal nylon gear from melting!
 
 # Saftey Lecture
 
