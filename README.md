@@ -73,7 +73,7 @@ So far my experience with VESC has been great - hats off to the developers for a
 
 # Flipsky
 
-My Flipsky 75100 experience has been ok so far - I don't pull 4kw from it, max 2.5kw for steep hills - just 10-15mph lightweight ebiking. 
+My Flipsky 75100 experience has been ok so far - I don't pull 4kw from it, max 2.5kw for steep hills - just 10-15mph lightweight ebiking on narrow paths - hence the lower speeds and safety.
 
 USB comms: the USB cable - is right next to the phase wires in the hole on the 75100, so as soon as the motor turns on - USB comms usually fails.
 
