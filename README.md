@@ -37,7 +37,7 @@ You'll also need to setup your BBSHD properly for this to work.
 
 PID Controllers->Minimum ERPM  (Mine is set to 600)
 
-PID Controllers->Ramp eRPMs per second (Mine is set to 2500) - this can be used as a acceleration setting, and it's linear in nature. 
+PID Controllers->Ramp eRPMs per second (Mine is set to 2500) - this can be used as a acceleration setting, and it seems to be linear in nature. 
 
 Additional Info->Setup->Wheel diameter
 
