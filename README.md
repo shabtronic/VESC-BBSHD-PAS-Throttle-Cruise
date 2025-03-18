@@ -66,3 +66,15 @@ Using passwordextra instead of password to unlock will display four more speed b
 As soon as the motor starts spinning all buttons and sliders are disabled - apart from the "PANIC" button - safety first!
 
 ![](./Images/PasThrottleCruiseAnim.gif)
+
+# VESC
+
+So far my experience with VESC has been great - hats off to the developers for a really great slick system that enables you to tweak your ESC into whatever you want.
+
+# Flipsky
+
+My Flipsky 75100 experience has been ok so far - I don't put 4kw into it - just 10-15mph lightweight ebiking. 
+
+USB comms: the USB cable - is right next to the phase wires in the hole on the 75100, so as soon as the motor turns on - USB comms usually fails.
+
+Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I developed this using win11 and a android phone, switching between the two was sometimes problematic. You have to wait till the Caps have fully discharged (Blue LED turns off) on the Flipsky when you turn it off before you turn it back on. Win 11 also sometimes doesn't disconnect from the flipsky when you shut down VESC tool - and you have to remove the BT device in windows and reboot and start again.
