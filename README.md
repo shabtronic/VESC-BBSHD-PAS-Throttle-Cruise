@@ -79,6 +79,10 @@ USB comms: the USB cable - is right next to the phase wires in the cable exit ho
 
 Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I developed this using win11 and a android phone, switching between the two was sometimes problematic. You have to wait till the Caps have fully discharged (Blue LED turns off) on the Flipsky when you turn it off before you turn it back on. Win 11 also sometimes doesn't disconnect from the flipsky when you shut down VESC tool - and you have to remove the BT device in windows and reboot and start again.
 
+# BBSHD
+
+What a superb motor! - built like a tank!! I've ridden 10,000 miles plus over the 5 years I've owned the BBSHD. No problems with it at all - no noises or issues. I gear 28/32 for hill climbing torque and I think that's the key to the BBSHD longvity - it likes to spin fast (all motors do :) ) - and that stops the internal nylon gear from melting!
+
 # Saftey Lecture
 
 The BBSHD is a very powerful motor - if things go wrong it can easily overpower you and pull you into traffic and splat. So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
