@@ -82,3 +82,5 @@ Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I de
 # Saftey Lecture
 
 The BBSHD is a very powerful motor - if things go wrong it can easily overpower you and pull you into traffic and splat. So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
+
+- if your brake cable disconnects - you can off the motor with the panic button or shutdown the app.
