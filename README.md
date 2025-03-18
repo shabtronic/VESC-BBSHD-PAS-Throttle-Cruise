@@ -85,6 +85,6 @@ What a superb motor! - built like a tank!! I've ridden 10,000 miles plus over th
 
 # Safety Lecture
 
-The BBSHD is a very powerful motor - if things go wrong it can easily overpower you and pull you into traffic and splat. So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
+The BBSHD is a very powerful motor - if things go wrong it can easily overpower (2.5kw = 3.3HP!) you and pull you into traffic and splat. This system uses PID - so it will attempt to match the speed you set - and ramp up the power until it reaches that speed. So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
 
 - if your brake cable disconnects - you can shut off the motor with the panic button or shutdown the app or disconnect the battery.
