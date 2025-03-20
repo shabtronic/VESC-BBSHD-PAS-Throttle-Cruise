@@ -23,15 +23,17 @@ Item {
     Component.onCompleted:
     {
         mCommands.emitEmptySetupValues()
+        console.log("10 mph to ERPM:"+convMPHtoERPM(10))
+        console.log("10000 ERPM to mph:"+convERPMtoMPH(10000))
+         console.log("10 mph to ERPM to mpg:"+convERPMtoMPH(convMPHtoERPM(10)))
     }
     property var colours: [Qt.vector3d(0,0,0),Qt.vector3d(0,0,0.5),Qt.vector3d(0.5,0,0),Qt.vector3d(0,0,0.0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.5,0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.25,0),Qt.vector3d(0,0,0),Qt.vector3d(0.0,0.0,0),Qt.vector3d(0.05,0.05,0.05),Qt.vector3d(0.15,0.15,0.15),Qt.vector3d(0.1,0.1,0.2),Qt.vector3d(0.1,0.1,0.2)]
     property var curColour:0
 
-    property var drawshaders:true
     property var shadertime:0
     property var param1:0
 
-    property var gearRatio: (8*21.9*28/32)
+    property var gearRatio: (8*21.9*28.0/32.0)
     property var wheelDiameter: 28.5
 
     property var password : "353838"
@@ -80,12 +82,12 @@ Item {
 
     function convERPMtoMPH(erpm)
     {
-         return erpm/((63360/(wheelDiameter*Math.PI*60.0))*gearRatio)
+         return (erpm/gearRatio)*(wheelDiameter*Math.PI)/(63360/60.0)
     }
 
     function convMPHtoERPM(mph)
     {
-        return (mph*63360/(wheelDiameter*Math.PI*60.0))*gearRatio
+        return ((mph*63360/60.0)/(wheelDiameter*Math.PI))*gearRatio
     }
 
     property var speedButtons: [b1,b2,b3,b4,b5,b6,b7,b8]
@@ -173,7 +175,7 @@ Item {
         lockButton.enabled=true;
         enableButtons(true);
         }
-    ampLabel.text=values.current_motor.toFixed(0)+" Amps";
+    ampLabel.text="Amps: "+values.current_motor.toFixed(0);
     speedLabel.text=Math.abs(convERPMtoMPH(motorRPM)).toFixed(1)+" MPH"
     rpmLabel.text="ERPM: "+values.rpm.toFixed(1)
 
@@ -235,7 +237,7 @@ Item {
 
  function onValuesSetupReceived(values, mask)
     {
-    wheelDiameter=mMcConf.getParamDouble("si_wheel_diameter")*1000*0.0393701;
+    //wheelDiameter=mMcConf.getParamDouble("si_wheel_diameter")*0.0393701;
     minBattery=mMcConf.getParamDouble("l_min_vin")
     maxBattery=84
     }
@@ -404,7 +406,6 @@ color: "#000000"
                     property var time: shadertime
                     property var resx : parent.width
                     property var resy : parent.height
-                    visible: drawshaders
                     fragmentShader: roundrectvgrad
                     }
                     }
@@ -437,7 +438,6 @@ color: "#000000"
             actualERPM=0;
             pedalStatic=pasPedalCount
             mCommands.setRpm(0)
-            console.log("Panic clicked!")
          }
 
         background:Rectangle
@@ -453,7 +453,6 @@ color: "#000000"
                 property var resx : parent.width
                 property var resy : parent.height
                 //property var buttondown: panicbutton.pressed
-                visible: drawshaders
                 fragmentShader: hypnoshader
                 }
         }
@@ -489,7 +488,6 @@ color: "#000000"
             property var time: shadertime
             property var resx : parent.width
             property var resy : parent.height
-            visible: drawshaders
             fragmentShader: roundrectvgrad
             }
         }
@@ -515,8 +513,8 @@ color: "#000000"
                         Label {
                 horizontalAlignment: Text.AlignHCenter
                 id :ampLabel
-                color: "#FFFFFF"
-                text:"0 Amps"
+                color: "#8080FF"
+                text:"Amps: 0"
                 font.pointSize : 35
                 }
         }
@@ -592,7 +590,6 @@ GroupBox {
                     property var time: shadertime
                     property var resx : parent.width
                     property var resy : parent.height
-                    visible: drawshaders
                     fragmentShader: hypnoshader
                     }
                     }
@@ -633,7 +630,6 @@ GroupBox {
             property var time: shadertime
             property var resx : parent.width
             property var resy : parent.height
-            visible: drawshaders
             fragmentShader: roundrectvgrad
             }
         }
@@ -666,7 +662,6 @@ GroupBox {
                     property var time: shadertime
                     property var resx : parent.width
                     property var resy : parent.height
-                    visible: drawshaders
                     fragmentShader: hscanner
                     }
                     }
@@ -708,7 +703,6 @@ GroupBox {
             property var resy : parent.height
             property var startcol: colours[curColour]
             property var endcol: colours[curColour+1]
-            visible: drawshaders
             fragmentShader: roundrectvgrad
             }
         }
@@ -724,8 +718,7 @@ GroupBox {
                 {
                 horizontalAlignment: Text.AlignHCenter
                 id :infoLabel
-                color: "#ff8f00"
-                text: "Dist: 0 miles Avg Speed: 0 mph"
+                text: "Dist: 0 miles Avg Speed: 0 MPH"
                 font.pointSize : 20
                 }
         }
@@ -752,7 +745,6 @@ GroupBox {
         Label {
                 horizontalAlignment: Text.AlignHCenter
                 id :tripLabel
-                color: "#00ff00"
                 text: "Time: 00:00 Trip Time: 00:00:00"
                 font.pointSize : 20
                 }
@@ -780,7 +772,6 @@ GroupBox {
             property var resy : parent.height
             property var startcol: colours[curColour]
             property var endcol: colours[curColour+1]
-            visible: drawshaders
             fragmentShader: roundrectvgrad
             }
         }
@@ -862,7 +853,6 @@ GroupBox {
                 property var resx : width
                 property var resy : height
                 //property var buttondown: lockButton.pressed
-                visible: drawshaders
                 fragmentShader: hypnoshader
                 }
             }
