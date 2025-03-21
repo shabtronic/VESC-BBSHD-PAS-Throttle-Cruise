@@ -25,7 +25,7 @@ Braking will stop everything and reset the target speed to 0.
 
 ## Status: In progress 
 
-Probably extreme dangerous - not to be used at all.
+Probably extremely dangerous at the moment - not to be used at all.
 
 Currently fine tunning and testing. Trying to work out some smooth values e.t.c.
 
