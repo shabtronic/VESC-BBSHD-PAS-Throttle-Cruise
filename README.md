@@ -37,6 +37,8 @@ Playing around with glES shaders - fun fun fun!
 
 Sadly had to remove most comments in code, get the file sizes down so I could upload to vesc flash e.t.c.
 
+Vesc compresses any QML code to fit onto the tiny amout of free flash space - Which I think it's around 5kb, Vesc Desktop tool has a "calculate size" on the QML page to show you the compressed size.
+
 You'll also need to setup your BBSHD properly for this to work.
 
 ## Some important settings include:
