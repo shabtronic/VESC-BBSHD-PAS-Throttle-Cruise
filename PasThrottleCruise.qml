@@ -2,7 +2,6 @@ import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
-import Vedder.vesc.utility 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
@@ -15,333 +14,345 @@ import Vedder.vesc.configparams 1.0
 // Use at your own *RISK* - The author accepts no liability for any damage or injuries
 // if you use this software.
 
+// 4.7kb compressed
+
 Item {
+property Commands mCommands: VescIf.commands()
+property ConfigParams mMcConf: VescIf.mcConfig()
+Component.onCompleted:
+{
+wheelDiameter=mMcConf.getParamDouble("si_wheel_diameter")*39.3701;
+wheelDiameter=clamp(wheelDiameter,20,30);
+minBat=mMcConf.getParamDouble("l_min_vin")
+maxBat=84
+}
 
-    property Commands mCommands: VescIf.commands()
-    property ConfigParams mMcConf: VescIf.mcConfig()
+property var batcharge:[60,61.2,62.4,63.6,64.8,66.0,67.2,68.4,69.6,70.8,72,73.2,74.4,75.6,76.8,78,79.2,80.4,81.6,82.8,84]
 
-    Component.onCompleted:
-    {
-        mCommands.emitEmptySetupValues()
-        console.log("10 mph to ERPM:"+convMPHtoERPM(10))
-        console.log("10000 ERPM to mph:"+convERPMtoMPH(10000))
-         console.log("10 mph to ERPM to mpg:"+convERPMtoMPH(convMPHtoERPM(10)))
-    }
-    property var colours: [Qt.vector3d(0,0,0),Qt.vector3d(0,0,0.5),Qt.vector3d(0.5,0,0),Qt.vector3d(0,0,0.0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.5,0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.25,0),Qt.vector3d(0,0,0),Qt.vector3d(0.0,0.0,0),Qt.vector3d(0.05,0.05,0.05),Qt.vector3d(0.15,0.15,0.15),Qt.vector3d(0.1,0.1,0.2),Qt.vector3d(0.1,0.1,0.2)]
-    property var curColour:0
+function batPercent(v)
+{
+v=clamp(v,60,84);
+var i=0;
+for (var a=0;a<20;a++)
+if (v>=batcharge[a]) i=a;
+return (i+((v-batcharge[i])/(batcharge[i+1]-batcharge[i])))*5;
+}
 
-    property var shadertime:0
-    property var param1:0
+property var curveIdx:2.0
+property var colours: [Qt.vector3d(0,0,0),Qt.vector3d(0,0,0.5),Qt.vector3d(0.5,0,0),Qt.vector3d(0,0,0.0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.5,0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.25,0),Qt.vector3d(0,0,0),Qt.vector3d(0.0,0.0,0),Qt.vector3d(0.05,0.05,0.05),Qt.vector3d(0.15,0.15,0.15),Qt.vector3d(0.1,0.1,0.2),Qt.vector3d(0.1,0.1,0.2)]
+property var colourIdx:0
 
-    property var gearRatio: (8*21.9*28.0/32.0)
-    property var wheelDiameter: 28.5
+property var stime:0.0
+property var param1:0.0
 
-    property var password : "353838"
-    property var passwordextra : "353538"
+property var gr: (8*21.9*28.0/32.0)
+property var wheelDiameter: 0.0
 
-    property var componentsVisible: true
-    property var passwordVisible: false
-    property var extrasVisible: false
-    property var errorVisible: false
-    property var brakesTested: true
-    property var pedallabelVisible: true
-    // Various
-    property var totalTime: 0
-    property var motorRPM: 0
-    property var motorTime: 0.0000001
-    // Safety Values
-    property var maxMPH: 10
-    property var minMPH: 2
-    // Battery
-    property var minBattery:0
-    property var maxBattery:84
-    property var batteryPercentage:0
-    property var batteryPercentageStart:0
-    // Trip values
-    property var distTravelled: 0
-    // Lisp PAS vars
-    property var pasPedalRPM:0
-    property var pasPedalCount:0
-    // main vars for motor control
-    property var targetERPM: 0
-    property var actualERPM: 0
-    property var pedalStatic:-1000000
+property var pw : "353838"
+property var pwextra : "353538"
 
-    function curveMap(param)
-    {
-        if (param<0) param=0;
-        if (param>1) param=1;
-        return Math.tanh(Math.PI*(param*2-1))*0.5+0.5;
-    }
-    function updateMotor()
-    {
-        actualERPM+=(targetERPM-actualERPM)*0.975;
-        if (actualERPM>=0 && actualERPM<70000)
-           mCommands.setRpm(Math.round(actualERPM))
-    }
+property var cV: true
+property var pV: false
+property var exV: false
+property var eV: false
+property var brakesTested: true
+property var plV: true
 
-    function convERPMtoMPH(erpm)
-    {
-         return (erpm/gearRatio)*(wheelDiameter*Math.PI)/(63360/60.0)
-    }
+property var totalTime: 0
+property var mRPM: 0
+property var mTime: 0.0000001
 
-    function convMPHtoERPM(mph)
-    {
-        return ((mph*63360/60.0)/(wheelDiameter*Math.PI))*gearRatio
-    }
+property var maxMPH: 10
+property var minMPH: 2
 
-    property var speedButtons: [b1,b2,b3,b4,b5,b6,b7,b8]
+property var minBat:0
+property var maxBat:84
+property var bPCT:0
+property var bPCTStart:0
 
-    function enableButtons(value)
-    {
-        for (var a=0;a<8;a++)
-            speedButtons[a].enabled=value
-    }
+property var distTravelled: 0
 
-    function buttonActive(idx)
-    {
-    for (var a=0;a<8;a++)
-    if (idx==a )speedButtons[a].Material.background= "#008f00"
-    else        speedButtons[a].Material.background= "#404040"
-    }
+property var pRPM:0
+property var pCount:0
 
- Connections
- {
- property Commands mCommands: VescIf.commands()
- property ConfigParams mMcConf: VescIf.mcConfig()
- target: mCommands
+property var tERPM: 0
+property var aERPM: 0
+property var ps:-1000000
+property var zero: 0.0
 
- function onCustomAppDataReceived(data)
- {
-   var dv = new DataView(data, 0)
-   pasPedalRPM = dv.getUint8(0)-128
-   var paspc1=dv.getUint8(1)
-   var paspc2=dv.getUint8(2)
-   var paspc3=dv.getUint8(3)
-   pasPedalCount= (paspc1+(paspc2*256)+(paspc3*256*256))-(256*256*256/2)
+function clamp(v,min,max)
+{
+if (v<min) v=min;
+if (v>max) v=max;
+return v;
+}
 
-    var baselineratio=maxMPH/10
+function curveMap(v)
+{
+v=clamp(v,0,1)
+var res=0;
+if (curveIdx==0) res=(Math.sin(Math.pow(v,0.5))/0.84);
+if (curveIdx==1) res=(v);
+if (curveIdx==2) res=(Math.sin(Math.pow(v,2.0))/0.84);
+return clamp(res,0,1);
+}
 
-    var fullthrottle=(5*96*baselineratio)/accelSlider.value
+function updateMotor()
+{
+aERPM+=(tERPM-aERPM); /*0.965;*/
+mCommands.setRpm(Math.round(clamp(aERPM,0,100000)))
+}
 
-    if (!bikeLocked && brakesTested==true)
-    {
+function convERPMtoMPH(erpm)
+{
+return (erpm/gr)*(wheelDiameter*Math.PI)/(63360/60.0)
+}
 
-    if (pedalStatic==-1000000)
-        pedalStatic=pasPedalCount;
-    var pedalDelta=0;
+function convMPHtoERPM(mph)
+{
+return ((mph*63360/60.0)/(wheelDiameter*Math.PI))*gr
+}
 
-    pedalDelta= (pasPedalCount-pedalStatic)/fullthrottle;
-    if (pedalDelta<0)
-        {
-        pedalDelta=0;
-        pedalStatic=pasPedalCount
-        }
-    if (pedalDelta>1)
-        {
-        pedalDelta=1;
-        pedalStatic=pasPedalCount-(fullthrottle)
-        }
+property var speedButtons: [b1,b2,b3,b4,b5,b6,b7,b8]
 
-    param1=pedalDelta;
-    var mph=curveMap(pedalDelta)*(maxMPH-0.75);
-    if (mph<=0.05)mph=0;
-    if (mph>0.05) mph+=0.75;
-   if (pedalDelta>0)
-        pedallabelVisible=false
-        else
-        pedallabelVisible=true
-     targetERPM=convMPHtoERPM(mph)
-     pedalLabel.text= "Delta "+(pedalDelta).toFixed(3)+" MPH"
-     targetLabel.text=convERPMtoMPH(targetERPM).toFixed(1)+"  <MPH>"
-     }
- }
+function enableButtons(value)
+{
+for (var a=0;a<8;a++)
+speedButtons[a].enabled=value
+}
 
- function onValuesReceived(values, mask)
-    {
-    // Update info from vesc
-    motorRPM=values.rpm
+function buttonActive(idx)
+{
+for (var a=0;a<8;a++)
+if (idx==a )speedButtons[a].Material.background= "#008f00"
+else        speedButtons[a].Material.background= "#404040"
+}
 
-    if (motorRPM>1)
-        {
-        motorTime+=mainTimer.interval/1000
-        accelSlider.enabled=false;
-        lockButton.enabled=false;
-        enableButtons(false);
-        }
-    else
-        {
-        accelSlider.enabled=true;
-        lockButton.enabled=true;
-        enableButtons(true);
-        }
-    ampLabel.text="Amps: "+values.current_motor.toFixed(0);
-    speedLabel.text=Math.abs(convERPMtoMPH(motorRPM)).toFixed(1)+" MPH"
-    rpmLabel.text="ERPM: "+values.rpm.toFixed(1)
+Connections
+{
+target: mCommands
+function onCustomAppDataReceived(data)
+{
+var dv = new DataView(data, 0)
+pRPM = dv.getUint8(0)-128
+var pp1=dv.getUint8(1)
+var pp2=dv.getUint8(2)
+var pp3=dv.getUint8(3)
+pCount= (pp1+(pp2*256)+(pp3*256*256))-(256*256*256/2)
 
-    if (motorRPM>0)
-        speedLabel.color="#80ff80"
-        else
-        speedLabel.color="#ffffff"
+var fullthrottle=(5*96*(maxMPH/10))/accelSlider.value
 
-    if (values.kill_sw_active)
-        {
-        pedalStatic=pasPedalCount
-        actualERPM=0
-        targetERPM=0
-        errorLabel.text="Braking!!"
-        errorVisible=true
-        if (brakesTested==false)
-            {
-            brakesTested=true;
-            componentsVisible=true;
-            errorVisible=false;
-            }
-        }
-        else
-        {
-        if (brakesTested==true)
-            {
-            errorLabel.text=""
-            errorVisible=false;
-            }
-        }
+if (!bikeLocked && brakesTested==true)
+{
+if (ps==-1000000)
+ps=pCount;
+var pedalDelta=0;
 
-    // Calc Battery stats
-    batteryPercentage = 100*(values.v_in - minBattery)/(maxBattery - minBattery)
-    if (batteryPercentageStart==0)
-        batteryPercentageStart=batteryPercentage
+pedalDelta= (pCount-ps)/fullthrottle;
+if (pedalDelta<0)
+{
+pedalDelta=0;
+ps=pCount
+}
+if (pedalDelta>1)
+{
+pedalDelta=1;
+ps=pCount-(fullthrottle)
+}
 
-    // Calc Distance Travelled and Avg speed
-    var mps=convERPMtoMPH(motorRPM)/(60*60*1000/mainTimer.interval);
-    distTravelled+=mps;
-    var distTravelledAbs=(distTravelled/(motorTime/(60*60)));
-    var batteryUsed=batteryPercentageStart-batteryPercentage;
-    var distRemain = batteryPercentage/batteryUsed*distTravelledAbs;
+param1=pedalDelta;
+var mph=curveMap(pedalDelta)*(maxMPH-0.75);
+if (mph<=0.05)mph=0;
+if (mph>0.05) mph+=0.75;
+if (pedalDelta>0)
+plV=false
+else
+plV=true
+tERPM=convMPHtoERPM(mph)
+targetLabel.text=convERPMtoMPH(tERPM).toFixed(1)+"  <MPH>"
+}
+}
 
-    // circa 2025 - no battery is gonna give you 1000 miles
-    if (distRemain<0) distRemain=0;
-    if (distRemain>1000) distRemain=0;
+function onValuesReceived(values, mask)
+{
+mRPM=values.rpm
 
-    infoLabel.text="Dist: "+distTravelled.toFixed(3)+" Miles Avg: "+distTravelledAbs.toFixed(1)+" MPH Est: "+distRemain.toFixed(1)+" Miles"
-    batteryLabel.text="Battery: "+(batteryPercentage).toFixed(1)+"%"+" ("+values.v_in+")"
+if (mRPM>1)
+{
+mTime+=mainTimer.interval/1000
+accelSlider.enabled=false;
+lockButton.enabled=false;
+enableButtons(false);
+pedalMSG.visible=false;
+}
+else
+{
+pedalMSG.visible=true;
+accelSlider.enabled=true;
+lockButton.enabled=true;
+enableButtons(true);
+}
+ampLabel.text="Amps: "+values.current_motor.toFixed(0);
+speedLabel.text=Math.abs(convERPMtoMPH(mRPM)).toFixed(1)+" MPH"
+rpmLabel.text="aERPM: "+aERPM.toFixed(0)+" ERPM: "+values.rpm.toFixed(1)
 
-    // Display Fault code
-    if (values.fault_str!="FAULT_CODE_NONE")
-        {
-        errorLabel.color="#ffff00"
-        errorLabel.text=values.fault_str;
-        errorVisible=true;
-        }
-    }
+if (mRPM>0)
+speedLabel.color="#80ff80"
+else
+speedLabel.color="#ffffff"
 
- function onValuesSetupReceived(values, mask)
-    {
-    //wheelDiameter=mMcConf.getParamDouble("si_wheel_diameter")*0.0393701;
-    minBattery=mMcConf.getParamDouble("l_min_vin")
-    maxBattery=84
-    }
- }
+if (values.kill_sw_active)
+{
+ps=pCount
+aERPM=0
+tERPM=0
+errorLabel.text="Braking!!"
+eV=true
+if (brakesTested==false)
+{
+brakesTested=true;
+cV=true;
+eV=false;
+}
+}
+else
+{
+if (brakesTested==true)
+{
+errorLabel.text=""
+eV=false;
+}
+}
 
-    anchors.fill: parent
-    property var bikeLocked:false
+bPCT = batPercent(values.v_in);
+if (bPCTStart==0)
+    bPCTStart=bPCT
 
-    function lockAPP()
-    {
-    if (motorRPM==0)
-        {
-        targetERPM=0;
-        actualERPM=0;
-        pedalStatic=pasPedalCount
-        componentsVisible=false
-        passwordVisible=true
-        passwordField.text=""
-        bikeLocked=true;
-        }
-    }
+var mps=convERPMtoMPH(mRPM)/(60*60*1000/mainTimer.interval);
+distTravelled+=mps;
+var dta=(distTravelled/(mTime/(60*60)));
+var distRemain = bPCT/(bPCTStart-bPCT)*dta;
+
+if (distRemain<0) distRemain=0;
+if (distRemain>1000) distRemain=0;
+
+infoLabel.text="Dist: "+distTravelled.toFixed(3)+" Miles Avg: "+dta.toFixed(1)
+batteryLabel.text="Battery: "+(bPCT).toFixed(1)+"%"+" ("+values.v_in+") Est: "+distRemain.toFixed(1)+" Miles"
+
+if (values.fault_str!="FAULT_CODE_NONE")
+{
+errorLabel.color="#ffff00"
+errorLabel.text=values.fault_str;
+eV=true;
+}
+}
+
+function onValuesSetupReceived(values, mask)
+{
+
+}
+}
+
+anchors.fill: parent
+property var bikeLocked:false
+
+function lockAPP()
+{
+if (mRPM==0)
+{
+tERPM=0;
+aERPM=0;
+ps=pCount
+cV=false
+pV=true
+pwField.text=""
+bikeLocked=true;
+}
+}
 
 
-    function _onEnterPressed(event)
-        {
-        if (passwordField.text.length==6)
-            {
-            if (passwordField.text==password)
-                {
-                componentsVisible=true
-                extrasVisible=false;
-                passwordVisible=false
-                bikeLocked=false;
-                if (maxMPH>15)
-                    {
-                    buttonActive(1);
-                    maxMPH=10;
-                    }
-                }
-                else
-                {
-                if (passwordField.text==passwordextra)
-                {
-                componentsVisible=true
-                extrasVisible=true;
-                passwordVisible=false
-                bikeLocked=false;
-                }
-                else
-                {
-                componentsVisible=false;
-                passwordVisible=false;
-                lockTimer.interval = 30000;
-                lockTimer.repeat = false;
-                lockTimer.start();
-                }
-                }
-            passwordField.text=""
-            }
-        }
+function _onEnterPressed(exVent)
+{
+if (pwField.text.length==6)
+{
+if (pwField.text==pw)
+{
+cV=true
+exV=false;
+pV=false
+bikeLocked=false;
+if (maxMPH>15)
+{
+buttonActive(1);
+maxMPH=10;
+}
+}
+else
+{
+if (pwField.text==pwextra)
+{
+cV=true
+exV=true;
+pV=false
+bikeLocked=false;
+}
+else
+{
+cV=false;
+pV=false;
+lockTimer.interval = 30000;
+lockTimer.repeat = false;
+lockTimer.start();
+}
+}
+pwField.text=""
+}
+}
 
-    function fmtstr(x)
-        {
-        var temp="%1"
-        temp=temp.arg(Math.round(x));
-        for (;temp.length<2;)
-            temp="0"+temp;
-        return temp
-        }
+function fmtstr(x)
+{
+var temp="%1"
+temp=temp.arg(Math.round(x));
+for (;temp.length<2;)
+temp="0"+temp;
+return temp
+}
 
-    function changeMaxSpeed(newSpeed)
-        {
-        if (newSpeed>30) newSpeed=30;
-        if (newSpeed<6) newSpeed=6;
-        maxMPH=newSpeed
-        }
+function changeMaxSpeed(newSpeed)
+{
+if (newSpeed>30) newSpeed=30;
+if (newSpeed<6) newSpeed=6;
+maxMPH=newSpeed
+}
 
-    Timer {
-        id: lockTimer
-        repeat : false;
-        interval: 30000;
-        running: false;
-        onTriggered: passwordVisible=true
-    }
+Timer {
+id: lockTimer
+repeat : false;
+interval: 30000;
+running: false;
+onTriggered: pV=true
+}
 
-    Timer {
-        id: mainTimer
-        interval: 16
-        repeat: true
-        running: true
-        onTriggered:
-        {
-        shadertime+=1.0/interval;
-        mCommands.getValues()
-        mCommands.sendAlive()
-        if (!bikeLocked && brakesTested)
-            updateMotor()
-        if (!bikeLocked)
-            {
-            totalTime=totalTime+interval/1000
-            tripLabel.text =  "Time: "+Qt.formatDateTime(new Date(),"hh:mm ")+" Trip: "+fmtstr(totalTime/(60*60))+":"+fmtstr((totalTime/60)%60)+":"+fmtstr(totalTime%60)
-            }
-       }
-    }
+Timer {
+id: mainTimer
+interval: 16 // 60hz frame rate
+repeat: true
+running: true
+property var c:0
+onTriggered:
+{
+stime+=interval/1000.0;
+mCommands.getValues()
+mCommands.sendAlive()
+if (!bikeLocked && brakesTested)
+updateMotor()
+if (!bikeLocked)
+{
+totalTime=totalTime+interval/1000
+tripLabel.text =  "Time: "+Qt.formatDateTime(new Date(),"hh:mm ")+" Trip: "+fmtstr(totalTime/(60*60))+":"+fmtstr((totalTime/60)%60)+":"+fmtstr(totalTime%60)
+}
+}
+}
 
 Rectangle
 {
@@ -350,685 +361,731 @@ anchors.fill: parent
 color: "#000000"
 }
 
-    ColumnLayout
-    {
-        id: gaugeColumn
-        anchors.fill: parent
-        // PASSWORD UI***************************************
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        visible : passwordVisible
-        Label
-            {
-            text: "Startup:"
-            font.pointSize : 30
-            }
-        }
-
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        visible : passwordVisible
-        TextField
-            {
-            horizontalAlignment: Text.AlignHCenter
-            Layout.fillWidth: true
-            id: passwordField
-            echoMode: TextInput.Password
-            maximumLength: 6
-            validator: IntValidator {bottom: 1; top: 999999}
-            font.pointSize : 30
-            onAccepted: _onEnterPressed()
-
-            }
-        }
-
-        // Main UI***************************************
-        GroupBox {
-        Layout.fillWidth: true
-        visible : componentsVisible
-        background:Rectangle
-                    {
-                    //opacity: 1
-                    //color:"#000000"
-                    layer.enabled: true;
-                    ShaderEffect
-                    {
-                    blending:false
-                    width: parent.width
-                    height: parent.height
-                    property var source: parent
-                    property var time: shadertime
-                    property var resx : parent.width
-                    property var resy : parent.height
-                    fragmentShader: roundrectvgrad
-                    }
-                    }
-        ColumnLayout
-        {
-        anchors.fill: parent
-        RowLayout
-        {
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            Button
-                {
-                Layout.fillWidth: true
-                text: "Horn"
-                onClicked:
-                    {
-                    }
-        }
-
-
-        Button
-        {
-            Layout.fillWidth: true
-            text: "Panic"
-            font.pointSize : 20
-            id:panicbutton
-            onClicked:
-            {
-            targetERPM=0;
-            actualERPM=0;
-            pedalStatic=pasPedalCount
-            mCommands.setRpm(0)
-         }
-
-        background:Rectangle
-            {
-            layer.enabled: true;
-            ShaderEffect
-                {
-                blending:false
-                width: parent.width
-                height: parent.height
-                property var source: parent
-                property var time: shadertime
-                property var resx : parent.width
-                property var resy : parent.height
-                //property var buttondown: panicbutton.pressed
-                fragmentShader: hypnoshader
-                }
-        }
-        }
-        Button
-        {
-            Layout.fillWidth: true
-            text: "UI Col"
-            onClicked:
-            {
-            curColour=(curColour+2)%colours.length;
-            }
-        }
-        }
-        }
-        }
-// Main speedo mph and Accel slider ***************************************
-        GroupBox {
-        id:mainbox
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        visible : componentsVisible
-
-        background:Rectangle
-        {
-        layer.enabled: true;
-        ShaderEffect
-            {
-            blending:false
-            width: parent.width
-            height: parent.height
-            property var source: parent
-            property var time: shadertime
-            property var resx : parent.width
-            property var resy : parent.height
-            fragmentShader: roundrectvgrad
-            }
-        }
-        ColumnLayout
-        {
-        anchors.fill: parent
-        RowLayout {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-                        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :targetLabel
-                color: "#FFFFFF"
-                text:"0 MPH"
-                font.pointSize : 70
-                }
-        }
-        RowLayout {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-                        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :ampLabel
-                color: "#8080FF"
-                text:"Amps: 0"
-                font.pointSize : 35
-                }
-        }
-        RowLayout {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :speedLabel
-                color: "#FFFFFF"
-                text: "0 MPH"
-                font.pointSize : 70
-                }
-        }
-
-
-        RowLayout {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :rpmLabel
-                color: "#8080FF"
-                text: "ERPM: 0"
-                font.pointSize : 30
-                }
-        }
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Slider
-            {
-            handle.implicitHeight: 34
-            handle.implicitWidth: 44
-            id:accelSlider
-            Layout.fillWidth: true
-            from: 0
-            to: 2
-            value: 1
-            onValueChanged:
-            {
-            pedalStatic=pasPedalCount
-            sliderLabel.text="Accel "+value.toFixed(2)
-            }
-            }
-        Label
-            {
-            id :sliderLabel
-            text: "Accel 1.00"
-            font.pointSize : 20
-            }
-        }
-}
-}
-
-// Error Status ********************************
-GroupBox {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        visible : (errorVisible)
-        background:Rectangle
-                    {
-                    layer.enabled: true;
-                    ShaderEffect
-                    {
-                    blending:false;
-                    width: parent.width
-                    height: parent.height
-                    property var source: parent
-                    property var time: shadertime
-                    property var resx : parent.width
-                    property var resy : parent.height
-                    fragmentShader: hypnoshader
-                    }
-                    }
-        ColumnLayout
-        {
-        anchors.fill: parent
-
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :errorLabel
-                color: "#FF4000"
-                text: "Brake to start"
-                font.pointSize : 30
-                }
-        }
-        }
-        }
-
-// Pedal RPM*********************************
-        GroupBox {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        visible : componentsVisible
-        background:Rectangle
-        {
-        layer.enabled: true;
-        ShaderEffect
-            {
-            blending:false
-            width: parent.width
-            height: parent.height
-            property var source: parent
-            property var time: shadertime
-            property var resx : parent.width
-            property var resy : parent.height
-            fragmentShader: roundrectvgrad
-            }
-        }
-        ColumnLayout
-        {
-        anchors.fill: parent
-
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :statusLabel
-                color: "#FFffC0"
-                text: "       Pedal to Start       "
-                font.pointSize : 20
-                visible: componentsVisible && pedallabelVisible
-                background:Rectangle
-                    {
-                    id:rect
-                    layer.enabled: true;
-                    ShaderEffect
-                    {
-                    blending:false
-                    width: parent.width
-                    height: parent.height
-                    property var source: parent
-                    property var time: shadertime
-                    property var resx : parent.width
-                    property var resy : parent.height
-                    fragmentShader: hscanner
-                    }
-                    }
-                }
-        }
-
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :pedalLabel
-                color: "#FF8080"
-                text: "Delta 0 MPH"
-                font.pointSize : 20
-                }
-        }
-    }
-}
-
-// Trip Info ******************************************
-        GroupBox {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-         visible : componentsVisible
-        background:Rectangle
-        {
-        layer.enabled: true;
-        ShaderEffect
-            {
-            blending:false;
-            width: parent.width
-            height: parent.height
-            property var source: parent
-            property var time: shadertime
-            property var resx : parent.width
-            property var resy : parent.height
-            property var startcol: colours[curColour]
-            property var endcol: colours[curColour+1]
-            fragmentShader: roundrectvgrad
-            }
-        }
-        ColumnLayout
-        {
-        anchors.fill: parent
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter
-        Label
-                {
-                horizontalAlignment: Text.AlignHCenter
-                id :infoLabel
-                text: "Dist: 0 miles Avg Speed: 0 MPH"
-                font.pointSize : 20
-                }
-        }
-
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :batteryLabel
-                color: "#ffff00"
-                text: "Battery: 100% (84.0) Est: 0 Miles"
-                font.pointSize : 20
-                }
-        }
-
-        RowLayout
-        {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
-        Label {
-                horizontalAlignment: Text.AlignHCenter
-                id :tripLabel
-                text: "Time: 00:00 Trip Time: 00:00:00"
-                font.pointSize : 20
-                }
-        }
-
-
-}
-}
-// Speed/Lock Buttons ******************************************
-        GroupBox {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-         visible : componentsVisible
-        background:Rectangle
-        {
-        layer.enabled: true;
-        ShaderEffect
-            {
-            blending:false;
-            width: parent.width
-            height: parent.height
-            property var source: parent
-            property var time: shadertime
-            property var resx : parent.width
-            property var resy : parent.height
-            property var startcol: colours[curColour]
-            property var endcol: colours[curColour+1]
-            fragmentShader: roundrectvgrad
-            }
-        }
-        ColumnLayout
-        {
-        anchors.fill: parent
-        RowLayout
-        {
-
-            visible: componentsVisible
-            Button
-            {
-                Layout.fillWidth: true
-                id: b1
-                font.pointSize : 20
-                text: "6mph"
-                onClicked:
-                    {
-                    changeMaxSpeed(6)
-                    buttonActive(0)
-                    }
-            }
-
-            Button
-            {
-                id:b2
-                font.pointSize : 20
-                Material.background: "#008f00"
-                Layout.fillWidth: true
-                text: "10MPH"
-                onClicked:
-                {
-                changeMaxSpeed(10)
-                buttonActive(1)
-                }
-            }
-            Button
-            {
-            id:b3
-            font.pointSize : 20
-            Layout.fillWidth: true
-            text: "12mph"
-             onClicked:
-                {
-                changeMaxSpeed(12)
-                buttonActive(2)
-                }
-            }
-            Button
-            {
-            id:b4
-            font.pointSize : 20
-            Layout.fillWidth: true
-            text: "15mph"
-            onClicked:
-                {
-                changeMaxSpeed(15)
-                buttonActive(3)
-                }
-            }
-            Button
-            {
-            id: lockButton
-            Layout.fillWidth: true
-            text: "Lock"
-            font.pointSize : 20
-            onClicked:  lockAPP()
-
-            background:Rectangle
-            {
-            layer.enabled: true
-            ShaderEffect
-                {
-                blending: false
-                width: parent.width
-                height: parent.height
-                property var source: parent
-                property var time: shadertime
-                property var resx : width
-                property var resy : height
-                //property var buttondown: lockButton.pressed
-                fragmentShader: hypnoshader
-                }
-            }
-            }
-        }
-        // passwordExtra buttons
-        RowLayout
-        {
-            visible: componentsVisible && extrasVisible
-            Button
-            {
-                Layout.fillWidth: true
-                id: b5
-                font.pointSize : 20
-                text: "17mph"
-                onClicked:
-                    {
-                    changeMaxSpeed(17)
-                    buttonActive(4)
-                    }
-            }
-            Button
-            {
-                id:b6
-                Layout.fillWidth: true
-                text: "18MPH"
-                font.pointSize : 20
-                onClicked:
-                {
-                changeMaxSpeed(18)
-                buttonActive(5)
-                }
-            }
-            Button
-            {
-            id:b7
-                Layout.fillWidth: true
-                text: "20mph"
-                font.pointSize : 20
-                onClicked:
-                {
-                changeMaxSpeed(20)
-                buttonActive(6)
-                }
-            }
-            Button
-            {
-            id:b8
-                Layout.fillWidth: true
-                text: "30mph"
-                font.pointSize : 20
-                onClicked:
-                {
-                changeMaxSpeed(30)
-                buttonActive(7)
-                }
-
-            }
-
-        }
-    }
-}
-}
-Rectangle
+ColumnLayout
 {
+id: gaugeColumn
+anchors.fill: parent
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+visible : pV
+Label
+{
+text: "Startup:"
+font.pointSize : 30
+}
+}
+
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+visible : pV
+TextField
+{
+horizontalAlignment: Text.AlignHCenter
+Layout.fillWidth: true
+id: pwField
+echoMode: TextInput.Password
+maximumLength: 6
+validator: IntValidator {bottom: 1; top: 999999}
+font.pointSize : 30
+onAccepted: _onEnterPressed()
+}
+}
+
+GroupBox {
+Layout.fillWidth: true
+visible : cV
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down: zero
+property var sc: colours[colourIdx]
+property var ec: colours[colourIdx+1]
+fragmentShader: roundrectvgrad
+}
+}
+ColumnLayout
+{
+anchors.fill: parent
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Button
+{
+Layout.fillWidth: true
+id: hornbutton
+text: "Horn"
+font.pointSize : 20
+enabled:false
+onClicked:
+{
+}
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false;
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down : (hornbutton.pressed+0.001)
+fragmentShader: roundrectvgrad
+}
+}
+}
+
+Button
+{
+Layout.fillWidth: true
+text: "Panic"
+font.pointSize : 20
+id:panicbutton
+onClicked:
+{
+tERPM=0;
+aERPM=0;
+ps=pCount
+}
+
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down: panicbutton.pressed+0.001
+fragmentShader: hypnoshader
+}
+}
+}
+Button
+{
+Layout.fillWidth: true
+text: "UI Col"
+id :uicolbutton
+font.pointSize : 20
+onClicked:
+{
+colourIdx=(colourIdx+2)%colours.length;
+}
+background:Rectangle
+{
+
+layer.enabled: true;
+ShaderEffect
+{
+blending:false;
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down : uicolbutton.pressed+0.001
+property var sc: colours[colourIdx]
+property var ec: colours[colourIdx+1]
+fragmentShader: roundrectvgrad
+}
+}
+}
+}
+}
+}
+
+GroupBox {
+id:mainbox
+Layout.fillWidth: true
+Layout.fillHeight: true
+visible : cV
+
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down:zero
+fragmentShader: roundrectvgrad
+}
+}
+ColumnLayout
+{
+anchors.fill: parent
+RowLayout {
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :targetLabel
+color: "#FFFFFF"
+text:"0 MPH"
+font.pointSize : 70
+}
+}
+RowLayout {
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :ampLabel
+color: "#8080FF"
+text:"Amps: 0"
+font.pointSize : 35
+}
+}
+RowLayout {
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :speedLabel
+color: "#FFFFFF"
+text: "0 MPH"
+font.pointSize : 70
+}
+}
+
+
+RowLayout {
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :rpmLabel
+color: "#8080FF"
+text: "ERPM: 0"
+font.pointSize : 30
+}
+}
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Slider
+{
+handle.implicitHeight: 34
+handle.implicitWidth: 44
+id:accelSlider
+Layout.fillWidth: true
+from: 0.01
+to: 1
+value: 0.15
+onValueChanged:
+{
+ps=pCount
+sliderLabel.text="Accel "+value.toFixed(2)
+}
+}
+Label
+{
+id :sliderLabel
+text: "Accel 0.15"
+font.pointSize : 20
+}
+}
+}
+}
+
+GroupBox {
+Layout.fillWidth: true
+Layout.fillHeight: true
+visible : (eV)
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false;
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down:zero
+fragmentShader: hypnoshader
+}
+}
+ColumnLayout
+{
+anchors.fill: parent
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :errorLabel
+color: "#FF4000"
+text: "Brake to start"
+font.pointSize : 30
+}
+}
+}
+}
+
+GroupBox {
+Layout.fillWidth: true
+Layout.fillHeight: true
+visible : cV
+id: pedalMSG
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down:zero
+fragmentShader: roundrectvgrad
+}
+}
+ColumnLayout
+{
+anchors.fill: parent
+
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :statusLabel
+color: "#FFffC0"
+text: "       Pedal to Start       "
+font.pointSize : 30
+visible: cV && plV
+background:Rectangle
+{
+id:rect
+layer.enabled: true;
+ShaderEffect
+{
+blending:false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down:0.0001
+fragmentShader: hscanner
+}
+}
+}
+}
+}
+}
+
+GroupBox {
+Layout.fillWidth: true
+Layout.fillHeight: true
+visible : cV
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false;
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down:0.0001
+fragmentShader: roundrectvgrad
+}
+}
+ColumnLayout
+{
+anchors.fill: parent
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :infoLabel
+text: "Dist:"
+font.pointSize : 25
+}
+}
+
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :batteryLabel
+color: "#ffff00"
+text: "Battery:"
+font.pointSize : 25
+}
+}
+
+RowLayout
+{
+Layout.fillHeight: true
+Layout.fillWidth: true
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+Label {
+horizontalAlignment: Text.AlignHCenter
+id :tripLabel
+text: "Time: 00:00 Trip Time: 00:00:00"
+font.pointSize : 25
+}
+}
+}
+}
+
+GroupBox {
+Layout.fillWidth: true
+Layout.fillHeight: true
+visible : cV
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false;
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down:0.0001
+fragmentShader: roundrectvgrad
+}
+}
+ColumnLayout
+{
+anchors.fill: parent
+RowLayout
+{
+
+visible: cV
+Button
+{
+Layout.fillWidth: true
+id: b1
+font.pointSize : 20
+text: "6mph"
+onClicked:
+{
+changeMaxSpeed(6)
+buttonActive(0)
+}
+}
+
+Button
+{
+id:b2
+font.pointSize : 20
+Material.background: "#008f00"
+Layout.fillWidth: true
+text: "10MPH"
+onClicked:
+{
+changeMaxSpeed(10)
+buttonActive(1)
+}
+}
+Button
+{
+id:b3
+font.pointSize : 20
+Layout.fillWidth: true
+text: "12mph"
+onClicked:
+{
+changeMaxSpeed(12)
+buttonActive(2)
+}
+}
+Button
+{
+id:b4
+font.pointSize : 20
+Layout.fillWidth: true
+text: "15mph"
+onClicked:
+{
+changeMaxSpeed(15)
+buttonActive(3)
+}
+}
+Button
+{
+id: lockButton
+Layout.fillWidth: true
+text: "Lock"
+font.pointSize : 20
+onClicked:  lockAPP()
+background:Rectangle
+{
+layer.enabled: true
+ShaderEffect
+{
+blending: false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : width
+property var ry : height
+property var down: (lockButton.pressed+0.001)
+fragmentShader: hypnoshader
+}
+}
+}
+}
+RowLayout
+{
+visible: cV && exV
+Button
+{
+Layout.fillWidth: true
+id: b5
+font.pointSize : 20
+text: "17mph"
+onClicked:
+{
+changeMaxSpeed(17)
+buttonActive(4)
+}
+}
+Button
+{
+id:b6
+Layout.fillWidth: true
+text: "18MPH"
+font.pointSize : 20
+onClicked:
+{
+changeMaxSpeed(18)
+buttonActive(5)
+}
+}
+Button
+{
+id:b7
+Layout.fillWidth: true
+text: "20mph"
+font.pointSize : 20
+onClicked:
+{
+changeMaxSpeed(20)
+buttonActive(6)
+}
+}
+Button
+{
+id:b8
+Layout.fillWidth: true
+text: "30mph"
+font.pointSize : 20
+onClicked:
+{
+changeMaxSpeed(30)
+buttonActive(7)
+}
+
+}
+
+}
+}
+}
+}
+Button
+{
+id: tirebutton
+text :"Wheel\n"+wheelDiameter.toFixed(1)+"\""
+font.pointSize : 16
+x:mainbox.x+mainbox.width/5-mainbox.width/6
+y:mainbox.y+(mainbox.height-mainbox.width/5)/2
+width:mainbox.width/6
+height:width
+visible: cV
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false;
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down: zero
+fragmentShader: roundrectvgrad
+}
+}
+}
+
+Button
+{
+id: curvebutton
+onClicked:
+    {
+    curveIdx=(curveIdx+1)%3;  ps=-1000000
+    }
 x:mainbox.x+mainbox.width-mainbox.width/5
 y:mainbox.y+(mainbox.height-mainbox.width/5)/2
 width:mainbox.width/6
 height:width
-visible: componentsVisible
-opacity:1
+visible: cV
+background:Rectangle
+{
 layer.enabled: true;
 ShaderEffect
-    {
-    blending:false
-    width: parent.width
-    height: parent.height
-    property var source: parent
-    property var time: shadertime
-    property var resx : width
-    property var resy : height
-    property var glparam1:param1
-    visible: true
-    fragmentShader: sigmoid
-    }
+{
+blending:false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : width
+property var ry : height
+property var down: (curvebutton.pressed+0.01)
+property var cidx :curveIdx+0.01
+property var p1 : param1
+fragmentShader: curves
+}
+}
 }
 
 property var shdr : "varying highp vec2 qt_TexCoord0;
 uniform highp float time;
-uniform highp float resx;
-uniform highp float resy;"
-
-property var hypnoshader:shdr+"
-//uniform highp int buttondown;
+uniform highp float rx;
+uniform highp float ry;
+uniform highp float down;
+uniform highp float cidx;
+uniform highp vec3 sc;
+uniform highp vec3 ec;
+uniform highp float p1;
+#define tc qt_TexCoord0
+#define gfc gl_FragColor
 float sdBox(vec2 p,vec2 b )
 {
-vec2 d = abs(p)-b;
-return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
+vec2 d=abs(p)-b;
+return length(max(d,0.0))+min(max(d.x,d.y),0.0);
 }
+"
+
+property var hypnoshader:shdr+"
 void main()
 {
-vec2 sspace=(qt_TexCoord0-0.5)*vec2(resx,resy);
-float rad=min(min(10.0,resx/2.0),resy/2.0);
-float d=-(sdBox(sspace,vec2(resx-rad*2.0,resy-rad*2.0)/2.0)-rad);
-float alpha=smoothstep(0.0-1.0,0.0+1.0,d);
-float xt=(time);
-float t = xt/3.0;
-vec2 c = ((qt_TexCoord0)*2.0-1.0)*vec2(resx/resy,1.0)/3.0;
-float s = (sin(sqrt(c.x*c.x + c.y*c.y)*10.0-(xt*1.0)) / sqrt(c.x*c.x+c.y*c.y))*0.5+0.5;
-vec3 color = vec3(c.x*0.5+0.5,0.0,(c.y)*0.25+0.85);
-if (d<2.0) {color+=vec3(0.5);s=1.0;}
-gl_FragColor = vec4(color * s*alpha, alpha);
+vec2 ss=(tc-0.5)*vec2(rx,ry);
+float r=min(min(10.0,rx/2.0),ry/2.0);
+float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+float a=smoothstep(0.0-1.0,0.0+1.0,d);
+float t=(time*5.0+down*1234.0)/3.0;
+vec2 c=(tc*2.0-1.0)*vec2(rx/ry,1.0)/3.0;
+float s=(sin(sqrt(c.x*c.x+c.y*c.y)*10.0-(t*1.0))/sqrt(c.x*c.x+c.y*c.y))*0.5+0.5;
+vec3 co=vec3(c.x*0.5+0.5,0.0,c.y*0.25+0.85);
+if (d<2.0) {co+=vec3(0.5);s=1.0;}
+gfc=vec4(co*s*a,a);
 }"
 
 property var hscanner:shdr+"
 void main()
 {
-float t = time;
-vec2 coords = ((qt_TexCoord0) * 2.0 - 1.0)*vec2(resx/resy,1.0)/3.0;
-float x = coords.x*3.0;
-float y = coords.y;
-float s = (cos(t)*0.3+0.5);
-vec3 color = vec3(0.0);
-float cc=1.0-abs(s-qt_TexCoord0.x)/0.2;
-cc=cc*(1.0-abs((qt_TexCoord0.y-0.5))*2.0);
-if (abs(s-qt_TexCoord0.x)<0.2)
-color=vec3(1.0,cc*cc*2.0,cc);
-gl_FragColor = vec4(color*cc,cc);
+float t=time*5.0;
+vec2 c=(tc*2.0-1.0)*vec2(rx/ry,1.0)/3.0;
+float s=cos(t)*0.3+0.5;
+vec3 co=vec3(0.0);
+float cc=1.0-abs(s-tc.x)/0.2;
+cc=cc*(1.0-abs((tc.y-0.5))*2.0);
+if (abs(s-tc.x)<0.2)
+co=vec3(1.0,cc*cc*2.0,cc);
+gfc=vec4(co*cc,cc);
 }"
 
 property var roundrectvgrad:shdr+"
-uniform highp vec3 startcol;
-uniform highp vec3 endcol;
-float sdBox(vec2 p,vec2 b )
-{
-vec2 d = abs(p)-b;
-return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
-}
 void main()
 {
-vec2 sspace=(qt_TexCoord0-0.5)*vec2(resx,resy);
-float rad=min(min(15.0,resx/2.0),resy/2.0);
-float d=-(sdBox(sspace,vec2(resx-rad*2.0,resy-rad*2.0)/2.0)-rad);
-float alpha=smoothstep(0.5-1.0,0.5+1.0,d);
-vec3 color = mix(startcol,endcol,qt_TexCoord0.y);
-if (d<4.0) color+=0.1;
-gl_FragColor = vec4(color*alpha ,  alpha);
+vec2 ss=(tc-0.5)*vec2(rx,ry);
+float r=min(min(15.0,rx/2.0),ry/2.0);
+float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+float a=smoothstep(0.5-1.0,0.5+1.0,d);
+vec3 c=mix(sc,ec,tc.y);
+if (d<4.0) c+=0.1;
+c+=down;
+gfc=vec4(c*a,a);
 }"
 
-property var sigmoid:shdr+"uniform highp float glparam1;
-float sdBox(vec2 p,vec2 b )
+property var curves:shdr+"
+float curveMap(float v)
 {
-vec2 d = abs(p)-b;
-return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
-}
-float tanh(float v)
-{
-return (exp(v)-exp(-v))/(exp(v)+exp(-v));
+if (cidx==0.01) return (sin(pow(v,0.5))/0.84);
+if (cidx==1.01) return (v);
+return (sin(pow(v,2.0))/0.84);
 }
 void main( void )
 {
-vec2 sspace=(qt_TexCoord0-0.5)*vec2(resx,resy);
-float rad=min(min(15.0,resx/2.0),resy/2.0);
-float d=-(sdBox(sspace,vec2(resx-rad*2.0,resy-rad*2.0)/2.0)-rad);
-float alpha=smoothstep(0.5-1.0,0.5+1.0,d);
-vec2 pos = ( qt_TexCoord0 ) *2.0-1.0;
-pos.y=-pos.y;
-float color = 0.0;
-float dd=abs(tanh(pos.x*3.1415)*0.8-pos.y);
-float fd=10.0/resx;
-color=(1.0-smoothstep(0.0-fd,0.0+fd,dd))*10.0;
-color+=0.1;
-float tm=mod(time/4.0, 1.0)*2.0-1.0;
-vec2 dp=vec2(glparam1*2.0-1.0,tanh((glparam1*2.0-1.0)*3.1415)*0.8);
-float color2=clamp(1.0-length(pos-dp)*2.0, 0.0, 1.0);
-if (d<4.0) {color=0.5;color2=0.0;}
-gl_FragColor = vec4( (vec3(0.2, 0.2, 0.2)* color +vec3(1.0,0.8,0)*color2)*alpha,alpha);
+vec2 ss=(tc-0.5)*vec2(rx,ry);
+float r=min(min(15.0,rx/2.0),ry/2.0);
+float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+float a=smoothstep(0.5-1.0,0.5+1.0,d);
+vec2 p=tc*2.0-1.0;
+p.y=-p.y;
+float c=0.0;
+float dd=abs((curveMap((p.x/2.0)+0.5)*2.0-1.0)-p.y);
+float fd=10.0/pow(rx,0.85);
+c=((1.0-smoothstep(0.0-fd,0.0+fd,dd))*10.0)+0.1;
+vec2 dp=vec2(p1*2.0-1.0,curveMap(p1)*2.0-1.0);
+float c2=pow(clamp(1.0-length(p-dp)*1.0,0.0,1.0),3.0);
+if (d<4.0) {c=1.5;c2=0.0;}
+c+=down*4.0;
+gfc=vec4((vec3(0.2, 0.2, 0.2)*c+vec3(0.0,1.8,0.0)*c2)*a,a);
 }"
 }
