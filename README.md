@@ -7,7 +7,7 @@ This was made to remove the need for a throttle (illegal in the UK, or at least 
 
 Pas sensors are connected to RX and TX.
 
-My brakes (NYK ZOOM HB-876-E MTB) are simple switches (2 pin connectors) rather than pots (3 pin connectors) - so a 10k resistor from 3.3v connected to ADC2 and then the brake switch from ADC2 to gnd - to make it work properly, no floating values or madness when the motor switches on e.t.c. NOTE - should be the reverse of this so when brakes get disconnected - vesc thinks the kill switch is on
+My brakes (NYK ZOOM HB-876-E MTB) are simple switches (2 pin connectors) rather than pots (3 pin connectors) - so a 10k resistor from 3.3v connected to ADC2 and then the brake switch from ADC2 to gnd - to make it work properly, no floating values or madness when the motor switches on e.t.c. NOTE - should be the reverse of this so when brakes get disconnected - vesc thinks the kill switch is on and can also test if brakes are connected or not e.t.c.
 
 You'll need to upload these two files to your VESC controller:
 
