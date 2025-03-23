@@ -178,7 +178,7 @@ uniform highp vec3 ec;
 uniform highp float p1;
 #define tc qt_TexCoord0
 #define gfc gl_FragColor
-float sdBox(vec2 p,vec2 b ) // From IQ RGBAs 2D SDF functions
+float sdBox(vec2 p,vec2 b ) // From IQ RGBAs [2D SDF functions](https://iquilezles.org/articles/distfunctions2d/)
 {
 vec2 d=abs(p)-b;
 return length(max(d,0.0))+min(max(d.x,d.y),0.0);
