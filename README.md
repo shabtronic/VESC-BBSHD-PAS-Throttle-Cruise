@@ -79,13 +79,15 @@ As soon as the motor starts spinning all buttons and sliders are disabled - apar
 
 So far my experience with VESC has been great - hats off to the developers for a really great slick system that enables you to tweak your ESC into whatever you want.
 
+Sometimes running QML script on Desktop vesc tool - it will run really slowly and lag a huge amount when sending commands to the VESC controller via bluetooth (a few seconds), that issues doesn't happen on a android phone - not figured out what is going on there - maybe spamming error messages is clogging up the BT comms or something?
+
 # Flipsky
 
 My Flipsky 75100 experience has been ok so far - I don't pull 4kw from it, max 2.5kw for steep hills - just 10-15mph lightweight ebiking on narrow paths - hence the lower speeds and safety.
 
 USB comms: the USB cable - is right next to the phase wires in the cable exit hole on the 75100, so as soon as the motor turns on - USB comms usually fails.
 
-Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I developed this using win11 and a android phone, switching between the two was sometimes problematic. You have to wait till the Caps have fully discharged (Blue LED turns off) on the Flipsky when you turn it off before you turn it back on. Win 11 also sometimes doesn't disconnect from the flipsky when you shut down VESC tool - and you have to remove the BT device in windows and reboot and start again.
+Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I developed this using win11 and a android phone, switching between the two was sometimes problematic. You have to wait till the Caps have fully discharged (Blue LED turns off) on the Flipsky when you turn it off before you turn it back on. Win 11 also sometimes doesn't disconnect from the flipsky when you shut down the VESC tool - and so you have to remove the BT device in windows and reboot and start again. When it's in this "stuck" state - nothing can connect to VESC Bluetooth - including android.
 
 # BBSHD
 
