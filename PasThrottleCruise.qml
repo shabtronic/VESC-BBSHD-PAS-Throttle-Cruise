@@ -38,7 +38,7 @@ if (v>=batcharge[a]) i=a;
 return (i+((v-batcharge[i])/(batcharge[i+1]-batcharge[i])))*5;
 }
 
-property var curveIdx:2.0
+property var curveIdx:1.0
 property var colours: [Qt.vector3d(0,0,0),Qt.vector3d(0,0,0.5),Qt.vector3d(0.5,0,0),Qt.vector3d(0,0,0.0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.5,0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.25,0),Qt.vector3d(0,0,0),Qt.vector3d(0.0,0.0,0),Qt.vector3d(0.05,0.05,0.05),Qt.vector3d(0.15,0.15,0.15),Qt.vector3d(0.1,0.1,0.2),Qt.vector3d(0.1,0.1,0.2)]
 property var colourIdx:0
 
@@ -69,6 +69,7 @@ property var minBat:0
 property var maxBat:84
 property var bPCT:0
 property var bPCTStart:0
+property var bVolts:0;
 
 property var distTravelled: 0
 
@@ -90,16 +91,15 @@ return v;
 function curveMap(v)
 {
 v=clamp(v,0,1)
-var res=0;
+var res=v;
 if (curveIdx==0) res=(Math.sin(Math.pow(v,0.5))/0.84);
-if (curveIdx==1) res=(v);
 if (curveIdx==2) res=(Math.sin(Math.pow(v,2.0))/0.84);
 return clamp(res,0,1);
 }
 
 function updateMotor()
 {
-aERPM+=(tERPM-aERPM); /*0.965;*/
+aERPM+=(tERPM-aERPM);
 mCommands.setRpm(Math.round(clamp(aERPM,0,100000)))
 }
 
@@ -164,14 +164,12 @@ param1=pedalDelta;
 var mph=curveMap(pedalDelta)*(maxMPH-0.75);
 if (mph<=0.05)mph=0;
 if (mph>0.05) mph+=0.75;
-if (pedalDelta>0)
-plV=false
-else
-plV=true
+if (pedalDelta>0) plV=false; else plV=true;
 tERPM=convMPHtoERPM(mph)
 targetLabel.text=convERPMtoMPH(tERPM).toFixed(1)+"  <MPH>"
 }
 }
+
 
 function onValuesReceived(values, mask)
 {
@@ -179,7 +177,6 @@ mRPM=values.rpm
 
 if (mRPM>1)
 {
-mTime+=mainTimer.interval/1000
 accelSlider.enabled=false;
 lockButton.enabled=false;
 enableButtons(false);
@@ -192,9 +189,9 @@ accelSlider.enabled=true;
 lockButton.enabled=true;
 enableButtons(true);
 }
-ampLabel.text="Amps: "+values.current_motor.toFixed(0);
+ampLabel.text="Amps: "+values.current_motor.toFixed(1);
 speedLabel.text=Math.abs(convERPMtoMPH(mRPM)).toFixed(1)+" MPH"
-rpmLabel.text="aERPM: "+aERPM.toFixed(0)+" ERPM: "+values.rpm.toFixed(1)
+rpmLabel.text="ERPM: "+values.rpm.toFixed(1)
 
 if (mRPM>0)
 speedLabel.color="#80ff80"
@@ -206,6 +203,7 @@ if (values.kill_sw_active)
 ps=pCount
 aERPM=0
 tERPM=0
+errorLabel.color="#ffff00"
 errorLabel.text="Braking!!"
 eV=true
 if (brakesTested==false)
@@ -224,20 +222,12 @@ eV=false;
 }
 }
 
+bVolts=values.v_in;
 bPCT = batPercent(values.v_in);
 if (bPCTStart==0)
     bPCTStart=bPCT
 
-var mps=convERPMtoMPH(mRPM)/(60*60*1000/mainTimer.interval);
-distTravelled+=mps;
-var dta=(distTravelled/(mTime/(60*60)));
-var distRemain = bPCT/(bPCTStart-bPCT)*dta;
 
-if (distRemain<0) distRemain=0;
-if (distRemain>1000) distRemain=0;
-
-infoLabel.text="Dist: "+distTravelled.toFixed(3)+" Miles Avg: "+dta.toFixed(1)
-batteryLabel.text="Battery: "+(bPCT).toFixed(1)+"%"+" ("+values.v_in+") Est: "+distRemain.toFixed(1)+" Miles"
 
 if (values.fault_str!="FAULT_CODE_NONE")
 {
@@ -247,10 +237,6 @@ eV=true;
 }
 }
 
-function onValuesSetupReceived(values, mask)
-{
-
-}
 }
 
 anchors.fill: parent
@@ -334,23 +320,46 @@ onTriggered: pV=true
 }
 
 Timer {
-id: mainTimer
-interval: 16 // 60hz frame rate
+id: motorpollTimer
+interval: 100 // 10hz
 repeat: true
 running: true
-property var c:0
+onTriggered:
+{
+if (!bikeLocked && brakesTested)
+updateMotor()
+mCommands.getValues()
+mCommands.sendAlive()
+}
+}
+
+Timer {
+id: mainTimer
+interval: 50
+repeat: true
+running: true
 onTriggered:
 {
 stime+=interval/1000.0;
-mCommands.getValues()
-mCommands.sendAlive()
-if (!bikeLocked && brakesTested)
-updateMotor()
+if (mRPM>1)
+    mTime+=mainTimer.interval/1000
+
+
 if (!bikeLocked)
 {
-totalTime=totalTime+interval/1000
+totalTime=totalTime+interval/1000.0
 tripLabel.text =  "Time: "+Qt.formatDateTime(new Date(),"hh:mm ")+" Trip: "+fmtstr(totalTime/(60*60))+":"+fmtstr((totalTime/60)%60)+":"+fmtstr(totalTime%60)
 }
+
+distTravelled+=convERPMtoMPH(mRPM)/(60.0*60.0*1000.0/mainTimer.interval);
+var dta=(distTravelled/(mTime/(60.0*60.0)));
+var distRemain = bPCT/(bPCTStart-bPCT)*dta;
+
+if (distRemain<0) distRemain=0;
+if (distRemain>1000) distRemain=0;
+
+infoLabel.text="Dist: "+distTravelled.toFixed(3)+" Miles   Avg: "+dta.toFixed(1)+" MPH"
+batteryLabel.text="Battery: "+(bPCT).toFixed(1)+"%   Est: "+distRemain.toFixed(0)+" Miles"
 }
 }
 
@@ -1058,7 +1067,7 @@ float r=min(min(15.0,rx/2.0),ry/2.0);
 float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
 float a=smoothstep(0.5-1.0,0.5+1.0,d);
 vec3 c=mix(sc,ec,tc.y);
-if (d<4.0) c+=0.1;
+if (d<4.0) c+=0.04;
 c+=down;
 gfc=vec4(c*a,a);
 }"
