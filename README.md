@@ -94,6 +94,25 @@ minBat=mMcConf.getParamDouble("l_min_vin")
 maxBat=84
 }
 ```
+
+Reading data sent from lisp
+
+```
+Connections
+{
+target: mCommands
+function onCustomAppDataReceived(data)
+{
+var dv = new DataView(data, 0)
+pRPM = dv.getUint8(0)-128
+var pp1=dv.getUint8(1)
+var pp2=dv.getUint8(2)
+var pp3=dv.getUint8(3)
+pCount= (pp1+(pp2*256)+(pp3*256*256))-(256*256*256/2)
+}
+}
+```
+
 Shaders!!
 
 QML can run glsl shader code - on both the desktop and android versions. Android version seems to use gles 1.00 - and my phones GL compiler is really strict - every numeric literal needs 0.0 formatting. No fwidth,fdfx,fdfy. uniform int or uniform bool don't seem to work on android and so you have to "convert" everything to a float to pass to a uniform:
