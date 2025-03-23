@@ -95,7 +95,7 @@ What a superb motor! - built like a tank!! I've ridden 10,000 miles plus over th
 
 Gearing low - not only saves the nylon gear - it also saves the chain - I've had the same chain for 10,000 miles - zero damage to it - even on extreme hills (up to 35% grads).
 
-In fact a single gear setup, is perfect with BBSHD - no messing with derailleurs and all the problems they bring (they're just not up to spec to handle 2500w+).
+In fact a single gear setup, is perfect with BBSHD - no messing with derailleurs and all the problems they bring (they're just not up to spec to handle 2500w+). You can then chose your gearing to fit your ridiing environment and that's a massive improvement over fixed gear hub motors.
 
 High Voltage!!! That's also another key to BBSHD longevity - the higher the voltage the faster the motor can spin, also Higher voltage means less current and less "copper loses" for the same amount of power.
 
