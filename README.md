@@ -97,6 +97,10 @@ Gearing low - not only saves the nylon gear - it also saves the chain - I've had
 
 In fact a single gear setup, is perfect with BBSHD - no messing with derailleurs and all the problems they bring (they're just not up to spec to handle 2500w+).
 
+High Voltage!!! That's also another key to BBSHD longevity - the higher the voltage the faster the motor can spin, also Higher voltage means less current and less "copper loses" for the same amount of power.
+
+so Gear low and Voltage high!!!
+
 BBSHD pas sensor seems to have 24 magnets - so with 4x encoder reading that gives 96 discrete pedal positions.
 
 # Safety Lecture
