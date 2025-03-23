@@ -73,8 +73,8 @@ Using passwordextra instead of password to unlock will display four more speed b
 
 As soon as the motor starts spinning all buttons and sliders are disabled - apart from the "PANIC" button - safety first!
 
-//![](./Images/Animation.gif =300x50)
-<img src="./Images/Animation.gif " width="200">
+<img src="./Images/Animation.gif " width="300">
+
 # VESC
 
 So far my experience with VESC has been great - hats off to the developers for a really great slick system that enables you to tweak your ESC into whatever you want.
