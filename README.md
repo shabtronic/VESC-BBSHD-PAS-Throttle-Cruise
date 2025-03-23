@@ -267,13 +267,13 @@ gfc=vec4(colour*alpha,alpha);
 ```
 Sometimes running QML script on Desktop vesc tool - it will run really slowly and lag a huge amount when sending commands to the VESC controller via bluetooth (a few seconds to a few mins!!!), that issue doesn't happen on a android phone - not figured out what is going on there - maybe spamming error messages is clogging up the BT comms or something? 
 
-*Turns* out I was spamming VESC conroller with:
+*Turns* out I was 60hz spamming VESC conroller with:
 
 ```
 mCommands.getValues()
 mCommands.sendAlive()
 ```
-60hz - changed that to 10hz and the laggy problem has gone "away".
+changed that to 10hz and the laggy problem has gone "away".
 
 # Flipsky
 
