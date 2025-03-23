@@ -73,7 +73,7 @@ Using passwordextra instead of password to unlock will display four more speed b
 
 As soon as the motor starts spinning all buttons and sliders are disabled - apart from the "PANIC" button - safety first!
 
-![](./Images/Animation.gif=100x)
+![](./Images/Animation.gif =100x)
 
 # VESC
 
