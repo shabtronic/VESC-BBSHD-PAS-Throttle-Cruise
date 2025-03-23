@@ -97,7 +97,7 @@ Gearing low - not only saves the nylon gear - it also saves the chain - I've had
 
 In fact a single gear setup, is perfect with BBSHD - no messing with derailleurs and all the problems they bring (they're just not up to spec to handle 2500w+). You can then choose your gearing to fit your ridiing environment and that's a massive improvement over fixed gear hub motors.
 
-High Voltage!!! That's also another key to BBSHD longevity - the higher the voltage the faster the motor can spin, also Higher voltage means less current and less "copper loses" for the same amount of power.
+High Voltage!!! That's also another key to BBSHD longevity - the higher the voltage the faster the motor can spin, also Higher voltage means less current and less "copper loses" for the same amount of power. Less current also has less wear on your batteries. So it's a win win situation all round!
 
 so Gear low and Voltage high!!!
 
