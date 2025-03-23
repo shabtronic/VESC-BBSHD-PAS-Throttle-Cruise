@@ -79,7 +79,7 @@ As soon as the motor starts spinning all buttons and sliders are disabled - apar
 
 So far my experience with VESC has been great - hats off to the developers for a really great slick system that enables you to tweak your ESC into whatever you want.
 
-Sometimes running QML script on Desktop vesc tool - it will run really slowly and lag a huge amount when sending commands to the VESC controller via bluetooth (a few seconds), that issues doesn't happen on a android phone - not figured out what is going on there - maybe spamming error messages is clogging up the BT comms or something?
+Sometimes running QML script on Desktop vesc tool - it will run really slowly and lag a huge amount when sending commands to the VESC controller via bluetooth (a few seconds), that issue doesn't happen on a android phone - not figured out what is going on there - maybe spamming error messages is clogging up the BT comms or something?
 
 # Flipsky
 
