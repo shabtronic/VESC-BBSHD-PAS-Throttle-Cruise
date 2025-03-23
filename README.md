@@ -185,7 +185,7 @@ property var roundrectvgrad:shdr+"
 void main()
 {
 vec2 ss=(tc-0.5)*vec2(rx,ry);
-float r=min(min(15.0,rx/2.0),ry/2.0);
+float r=min(min(15.0,rx/2.0),ry/2.0); // edge radius of 15
 float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
 float a=smoothstep(0.5-1.0,0.5+1.0,d);
 vec3 c=mix(sc,ec,tc.y);
