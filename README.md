@@ -189,13 +189,13 @@ property var roundrectvgrad:shdr+"
 void main()
 {
 vec2 ss=(tc-0.5)*vec2(rx,ry);
-float r=min(min(15.0,rx/2.0),ry/2.0); // edge radius of 15
-float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
-float a=smoothstep(0.5-1.0,0.5+1.0,d);
-vec3 c=mix(sc,ec,tc.y);
-if (d<4.0) c+=0.04;
-c+=down;
-gfc=vec4(c*a,a);
+float radius=min(min(15.0,rx/2.0),ry/2.0); // edge radius of 15
+float dist=-(sdBox(ss,vec2(rx-radius*2.0,ry-radius*2.0)/2.0)-radius);
+float alpha=smoothstep(0.5-1.0,0.5+1.0,dist);
+vec3 colour=mix(sc,ec,tc.y);
+if (dist<4.0) colour+=0.04;
+colour+=down;
+gfc=vec4(colour*alpha,alpha);
 }"
 
 ```
