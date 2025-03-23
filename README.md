@@ -59,7 +59,7 @@ Accel is a divider for how many pedal rotations to get to max speed. This is lin
 
 Panic button STOPS EVERYTHING!
 
-The sigmoid curve - shows the parametric position to the max mph set. i.e. the position of the "Virtual Throttle". 
+The curve window - shows the parametric position to the max mph set. i.e. the position of the "Virtual Throttle". Click on that to select between 3 different Curves: Fast in,Linear and Slow In.
 
 Horn button does nothing - no QML media libs connected.
 
