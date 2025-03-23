@@ -83,7 +83,7 @@ So far my experience with VESC has been great - hats off to the developers for a
 
 It's all brackets!!! lol - it's simplistic parser uses polish notation instead of infix - it's fun and interesting, very simple nothing to stress out over.
 
-Here's the code to read the BBSHD pedal encoder, using 4x reading at 1000hz
+Here's the code to read the BBSHD pedal encoder, using 4x reading at 1000hz and sending to QML at 10hz
 
 ```
 ; <<PAS Throttle Cruise>>
