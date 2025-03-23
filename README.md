@@ -95,6 +95,15 @@ maxBat=84
 }
 ```
 
+You can only send u8's from lisp - so you have to break 'em up and offset if you wanna send larger ints e.t.c.
+
+Sending data from lisp
+
+```
+(def temppc (+ pasPedalCount 8388608))
+(send-data (list (+ (* pasPedalRPM 10) 128) (mod temppc 256) (mod (/ temppc 256) 256) (mod (/ temppc 65536) 256) ));
+```
+
 Reading data sent from lisp
 
 ```
