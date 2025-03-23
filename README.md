@@ -83,7 +83,7 @@ So far my experience with VESC has been great - hats off to the developers for a
 
 QML is really nice and simple to make UI's - java style coding - quick and simple.
 
-Sometimes QML code doesn't read the mcConf proper and returns the wrong wheel size (which can be really dangerous on a system using the wheel size as the main variable for speed calculations).
+Sometimes QML code doesn't read the mMcConf proper and returns the wrong wheel size (which can be really dangerous on a system using the wheel size as the main variable for speed calculations).
 
 ```
 Component.onCompleted:
@@ -94,7 +94,40 @@ minBat=mMcConf.getParamDouble("l_min_vin")
 maxBat=84
 }
 ```
+Shaders!!
 
+QML can run glsl shader code - on both the desktop and android versions. Android version seems to use gles 1.00 - and my phones GL compiler is really strict - every numeric literal needs 0.0 formatting. No fwidth,fdfx,fdfy. uniform int or uniform bool don't seem to work on android and so you have to "convert" everything to a float to pass to a uniform:
+```
+Button
+{
+Layout.fillWidth: true
+text: "UI Col"
+id :uicolbutton
+font.pointSize : 20
+onClicked:
+  {
+  colourIdx=(colourIdx+2)%colours.length;
+  }
+background:Rectangle
+  {
+  layer.enabled: true;
+  ShaderEffect
+  {
+  blending:false;
+  width: parent.width
+  height: parent.height
+  property var source: parent
+  property var time: stime
+  property var rx : parent.width
+  property var ry : parent.height
+  property var down : uicolbutton.pressed+0.001 // add 0.0001 to convert pressed to a float!
+  property var sc: colours[colourIdx]
+  property var ec: colours[colourIdx+1]
+  fragmentShader: roundrectvgrad
+  }
+  }
+}
+``
 Sometimes running QML script on Desktop vesc tool - it will run really slowly and lag a huge amount when sending commands to the VESC controller via bluetooth (a few seconds), that issue doesn't happen on a android phone - not figured out what is going on there - maybe spamming error messages is clogging up the BT comms or something?
 
 # Flipsky
