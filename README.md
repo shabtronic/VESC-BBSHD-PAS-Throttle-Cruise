@@ -85,13 +85,15 @@ QML is really nice and simple to make UI's - java style coding - quick and simpl
 
 Sometimes QML code doesn't read the mcConf proper and returns the wrong wheel size (which can be really dangerous on a system using the wheel size as the main variable for speed calculations).
 
-```Component.onCompleted:
+```
+Component.onCompleted:
 {
 wheelDiameter=mMcConf.getParamDouble("si_wheel_diameter")*39.3701;
 wheelDiameter=clamp(wheelDiameter,20,30);
 minBat=mMcConf.getParamDouble("l_min_vin")
 maxBat=84
-}```
+}
+```
 
 Sometimes running QML script on Desktop vesc tool - it will run really slowly and lag a huge amount when sending commands to the VESC controller via bluetooth (a few seconds), that issue doesn't happen on a android phone - not figured out what is going on there - maybe spamming error messages is clogging up the BT comms or something?
 
