@@ -93,7 +93,7 @@ Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I de
 
 What a superb motor! - built like a tank!! I've ridden 10,000 miles plus over the 5 years I've owned the BBSHD. No problems with it at all - no noises or issues. I gear 28/32 for hill climbing torque and I think that's the key to the BBSHD longevity - it likes to spin fast (all motors do :) ) - and that stops the internal nylon gear from melting!
 
-Gearing low - not only saves the nylon gear - it also saves the chain - I've had the same chain for 10,000 miles - zero damage to it - even on extreme hills (up to 35% grads).
+Gearing low - not only saves the nylon gear - it also saves the chain - I've had the same flimsy chain for 10,000 miles - zero damage to it - even on extreme hills (up to 35% grads).
 
 In fact a single gear setup, is perfect with BBSHD - no messing with derailleurs and all the problems they bring (they're just not up to spec to handle 2500w+). You can then choose your gearing to fit your ridiing environment and that's a massive improvement over fixed gear hub motors.
 
