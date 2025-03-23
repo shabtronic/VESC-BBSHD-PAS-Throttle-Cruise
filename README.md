@@ -147,19 +147,19 @@ background:Rectangle
   {
   layer.enabled: true;
   ShaderEffect
-  {
-  blending:false;
-  width: parent.width
-  height: parent.height
-  property var source: parent
-  property var time: stime
-  property var rx : parent.width
-  property var ry : parent.height
-  property var down : uicolbutton.pressed+0.001 // add 0.0001 to convert pressed to a float!
-  property var sc: colours[colourIdx]
-  property var ec: colours[colourIdx+1]
-  fragmentShader: roundrectvgrad
-  }
+    {
+    blending:false;
+    width: parent.width
+    height: parent.height
+    property var source: parent
+    property var time: stime
+    property var rx : parent.width
+    property var ry : parent.height
+    property var down : uicolbutton.pressed+0.001 // add 0.0001 to convert pressed to a float!
+    property var sc: colours[colourIdx]
+    property var ec: colours[colourIdx+1]
+    fragmentShader: roundrectvgrad
+    }
   }
 }
 ```
