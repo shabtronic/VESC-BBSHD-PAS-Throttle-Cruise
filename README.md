@@ -127,7 +127,43 @@ background:Rectangle
   }
   }
 }
-``
+```
+
+heres the actual shader code for that:
+```
+
+property var shdr : "varying highp vec2 qt_TexCoord0;
+uniform highp float time;
+uniform highp float rx;
+uniform highp float ry;
+uniform highp float down;
+uniform highp float cidx;
+uniform highp vec3 sc;
+uniform highp vec3 ec;
+uniform highp float p1;
+#define tc qt_TexCoord0
+#define gfc gl_FragColor
+float sdBox(vec2 p,vec2 b )
+{
+vec2 d=abs(p)-b;
+return length(max(d,0.0))+min(max(d.x,d.y),0.0);
+}
+"
+
+property var roundrectvgrad:shdr+"
+void main()
+{
+vec2 ss=(tc-0.5)*vec2(rx,ry);
+float r=min(min(15.0,rx/2.0),ry/2.0);
+float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+float a=smoothstep(0.5-1.0,0.5+1.0,d);
+vec3 c=mix(sc,ec,tc.y);
+if (d<4.0) c+=0.04;
+c+=down;
+gfc=vec4(c*a,a);
+}"
+
+```
 Sometimes running QML script on Desktop vesc tool - it will run really slowly and lag a huge amount when sending commands to the VESC controller via bluetooth (a few seconds), that issue doesn't happen on a android phone - not figured out what is going on there - maybe spamming error messages is clogging up the BT comms or something?
 
 # Flipsky
