@@ -104,6 +104,7 @@ Here's the code to read the BBSHD pedal encoder, using 4x reading at 1000hz and 
 
 (loopwhile t
 {
+    ; swap H1 and H2 around if your pedals read the reverse direction - just means they are wired differently to mine RX and TX
     (def h1 (gpio-read 'pin-tx))
     (def h2 (gpio-read 'pin-rx))
 
