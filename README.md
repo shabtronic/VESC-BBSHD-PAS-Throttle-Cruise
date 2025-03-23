@@ -155,7 +155,7 @@ background:Rectangle
     property var time: stime
     property var rx : parent.width
     property var ry : parent.height
-    property var down : (uicolbutton.pressed+0.001) // add 0.0001 to convert pressed to a float!
+    property var down : (uicolbutton.pressed+0.001) // add a small float value to convert pressed to a float!
     property var sc: colours[colourIdx]
     property var ec: colours[colourIdx+1]
     fragmentShader: roundrectvgrad
