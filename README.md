@@ -55,7 +55,7 @@ App settings->general->Kill Switch mode. (Mine is set to "ADC2 low")
 
 The top two big MPH labels are target speed and actual speed.
 
-Accel is a mulitiplier/divider for how many pedal rotations to get to max speed. This is linked to max speed, 20mph max speed takes 2x pedal rotations compared to 10mph e.t.c. Currently it's set to 5 full pedal rotations to get to 10mph.
+Accel is a divider for how many pedal rotations to get to max speed. This is linked to max speed, 20mph max speed takes 2x pedal rotations compared to 10mph e.t.c. Currently it's set to 5 full pedal rotations to get to 10mph if this slider is set to 1 and it would be 2.5 full pedal rotations to get to 10mph jf this slider is set to 2 e.t.c.
 
 Panic button STOPS EVERYTHING!
 
