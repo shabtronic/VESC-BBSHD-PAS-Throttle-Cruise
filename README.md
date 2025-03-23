@@ -79,6 +79,10 @@ As soon as the motor starts spinning all buttons and sliders are disabled - apar
 
 So far my experience with VESC has been great - hats off to the developers for a really great slick system that enables you to tweak your ESC into whatever you want.
 
+# LISP
+
+It's all brackets!!! lol - it's simplistic parser uses polish notation instead of infix - it's fun and interesting, very simple nothing to stress out over.
+
 # QML
 
 QML is really nice and simple to make UI's - java style coding - quick and simple.
