@@ -162,7 +162,7 @@ background:Rectangle
 
 heres the actual shader code for that:
 ```
-
+// Shader header used by every shader to cut down code size since we only have around 4kb of compressed QML code
 property var shdr : "varying highp vec2 qt_TexCoord0;
 uniform highp float time;
 uniform highp float rx;
