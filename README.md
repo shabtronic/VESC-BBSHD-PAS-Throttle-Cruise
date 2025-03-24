@@ -1,6 +1,6 @@
 # Safety Lecture
 
-Before you even contemplate looking at this software - please read the follow:
+Before you even contemplate looking at this software - please read the following:
 
 The BBSHD is a very powerful motor - if things go wrong, with low gearing it can easily physically overpower you (2.5kw = 3.3HP!) and pull you into traffic and splat. This system uses PID setRpm() - so it will attempt to match the speed you set - and ramp up the power until it reaches that speed - regardless of what's in front of you - a brick wall, a cliff, a 10 ton truck, a diabolical dr phibes bicycle trap e.t.c. . So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
 
