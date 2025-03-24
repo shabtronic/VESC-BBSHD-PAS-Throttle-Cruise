@@ -283,7 +283,7 @@ USB comms: the USB cable - is right next to the phase wires in the cable exit ho
 
 Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I developed this using win11 and a android phone, switching between the two was sometimes problematic. You have to wait till the Caps have fully discharged (Blue LED turns off) on the Flipsky when you turn it off before you turn it back on. Win 11 also sometimes doesn't disconnect from the flipsky when you shut down the VESC tool - and so you have to remove the BT device in windows and reboot and start again. When it's in this "stuck" state - nothing can connect to VESC Bluetooth - including android.
 
-*Note* Seems the win 11 lag and disconnect issue was linked to spamming the VESC controller as above - 10hz and all my Win11 issues go away! I'm guessing that the BT connection speed just can't handle 60hz packets - and fills up a send queue which gets sent whever possible. I also changed the polling rate in VESC Tool->Edit->Preferences->Data Polling - all down to 1.0hz just in case that was also adding to the BT congestion.
+*Note* Seems the win 11 lag and disconnect issue was linked to spamming the VESC controller as above - 10hz and all my Win11 issues go away! I'm guessing that the BT connection speed just can't handle 60hz worth of packets to and from VESC - and fills up a send queue which gets sent whever possible. I also changed the polling rate in VESC Tool->Edit->Preferences->Data Polling - all down to 1.0hz just in case that was also adding to the BT congestion.
 
 ```
 mCommands.getValues()
