@@ -1,3 +1,15 @@
+# Safety Lecture
+
+Before you even contemplate looking at this software - please read the follow:
+
+The BBSHD is a very powerful motor - if things go wrong, with low gearing it can easily physically overpower you (2.5kw = 3.3HP!) and pull you into traffic and splat. This system uses PID setRpm() - so it will attempt to match the speed you set - and ramp up the power until it reaches that speed - regardless of what's in front of you - a brick wall, a cliff, a 10 ton truck, a diabolical dr phibes bicycle trap e.t.c. . So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
+
+- if your brake cable disconnects - you can shut off the motor with the panic button or shutdown the app or disconnect the battery.
+ 
+Programming is always prone to errors - it's the only sensible way to approach "life crictical" software - so you need bench test this first - wheels off ground or chain removed and make sure the speeds are correct and you're comfortable with how this all works.
+
+Remember just the crank spinning gives no idea of real world acceleration and speed - so also start slow and low.
+
 # VESC-BBSHD PAS Throttle Cruise
 
 
@@ -330,10 +342,4 @@ BBSHD has a 24kv rating? so 72v=1636 rpm = 1636x8x21.9 = 291456 erpm. (not sure 
 
 BBSHD pas sensor seems to have 24 magnets - so with 4x encoder reading that gives 96 discrete pedal positions.
 
-# Safety Lecture
 
-The BBSHD is a very powerful motor - if things go wrong, with low gearing it can easily physically overpower you (2.5kw = 3.3HP!) and pull you into traffic and splat. This system uses PID setRpm() - so it will attempt to match the speed you set - and ramp up the power until it reaches that speed - regardless of what's in front of you - a brick wall, a cliff, a 10 ton truck, a diabolical dr phibes bicycle trap e.t.c. . So unless you know what you are doing with this kind of software - just don't bother - you have to consider this "Life Critical" code - and apply development thoughts with that as the Key feature.
-
-- if your brake cable disconnects - you can shut off the motor with the panic button or shutdown the app or disconnect the battery.
- 
-Programming is always prone to errors - it's the only sensible way to approach "life crictical" software - so you need bench test this first - wheels off ground or chain removed and make sure the speeds are correct e.t.c. 
