@@ -270,8 +270,19 @@ Sometimes running QML script on Desktop vesc tool - it will run really slowly an
 *Note:* Turns out I was 60hz spamming VESC conroller with:
 
 ```
-mCommands.getValues()
-mCommands.sendAlive()
+Timer {
+id: motorpollTimer
+interval: 100 // 10hz - was 60hz - waaaay too much for BT - spammed the vesc and slow downs!
+repeat: true
+running: true
+onTriggered:
+  {
+  if (!bikeLocked && brakesTested)
+    updateMotor()
+  mCommands.getValues()
+  mCommands.sendAlive()
+  }
+}
 ```
 changed that to 10hz and the laggy problem has gone "away".
 
@@ -286,8 +297,19 @@ Bluetooth comms: BT is a little flakey - think it's a issue with Winows 11. I de
 *Note:* Seems the win 11 lag and disconnect issue was linked to spamming the VESC controller as above - 10hz and all my Win11 issues go away! I'm guessing that the BT connection speed just can't handle 60hz worth of packets to and from VESC - and fills up a send queue which gets sent whever possible. I also changed the polling rate in VESC Tool->Edit->Preferences->Data Polling - all down to 1.0hz just in case that was also adding to the BT congestion.
 
 ```
-mCommands.getValues()
-mCommands.sendAlive()
+Timer {
+id: motorpollTimer
+interval: 100 // 10hz - was 60hz - waaaay too much for BT - spammed the vesc and slow downs!
+repeat: true
+running: true
+onTriggered:
+  {
+  if (!bikeLocked && brakesTested)
+    updateMotor()
+  mCommands.getValues()
+  mCommands.sendAlive()
+  }
+}
 ```
 
 # BBSHD
