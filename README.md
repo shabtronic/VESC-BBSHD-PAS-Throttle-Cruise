@@ -301,7 +301,7 @@ In fact a single gear setup, is perfect with BBSHD - no messing with derailleurs
 High Voltage!!! That's also another key to BBSHD longevity - the higher the voltage the faster the motor can spin, also Higher voltage means less current and less "copper loses" for the same amount of power. Less current also has less wear on your batteries. So it's a win win situation all round!
 
 so Gear low and Voltage high!!!
-
+ 
 BBSHD has a 24kv rating? so 72v=1636 rpm = 1636x8x21.9 = 291456 erpm. (not sure how accurate or correct these figures are)
 
 BBSHD pas sensor seems to have 24 magnets - so with 4x encoder reading that gives 96 discrete pedal positions.
