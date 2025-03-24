@@ -75,7 +75,8 @@ property var distTravelled: 0
 
 property var pRPM:0
 property var pCount:0
-
+property var cAmps:0
+property var tAmps:0
 property var tERPM: 0
 property var aERPM: 0
 property var ps:-1000000
@@ -189,7 +190,10 @@ accelSlider.enabled=true;
 lockButton.enabled=true;
 enableButtons(true);
 }
-ampLabel.text="Amps: "+values.current_motor.toFixed(1);
+
+tAmps=values.current_motor;
+if (tAmps<0) tAmps=0;
+
 speedLabel.text=Math.abs(convERPMtoMPH(mRPM)).toFixed(1)+" MPH"
 rpmLabel.text="ERPM: "+values.rpm.toFixed(1)
 
@@ -298,7 +302,7 @@ pwField.text=""
 function fmtstr(x)
 {
 var temp="%1"
-temp=temp.arg(Math.round(x));
+temp=x.toFixed(0);
 for (;temp.length<2;)
 temp="0"+temp;
 return temp
@@ -334,7 +338,7 @@ mCommands.sendAlive()
 }
 
 Timer {
-id: mainTimer
+id: gfxTimer
 interval: 50
 repeat: true
 running: true
@@ -342,24 +346,28 @@ onTriggered:
 {
 stime+=interval/1000.0;
 if (mRPM>1)
-    mTime+=mainTimer.interval/1000
+    mTime+=gfxTimer.interval/1000
 
 
 if (!bikeLocked)
 {
 totalTime=totalTime+interval/1000.0
-tripLabel.text =  "Time: "+Qt.formatDateTime(new Date(),"hh:mm ")+" Trip: "+fmtstr(totalTime/(60*60))+":"+fmtstr((totalTime/60)%60)+":"+fmtstr(totalTime%60)
+tripLabel.text =  "Time: "+Qt.formatDateTime(new Date(),"hh:mm ")+"       Trip: "+fmtstr(Math.floor(totalTime/(60*60)))+":"+fmtstr(Math.floor(totalTime/60)%60)+":"+fmtstr(Math.floor(totalTime)%60)
 }
 
-distTravelled+=convERPMtoMPH(mRPM)/(60.0*60.0*1000.0/mainTimer.interval);
+distTravelled+=convERPMtoMPH(mRPM)/(60.0*60.0*1000.0/gfxTimer.interval);
 var dta=(distTravelled/(mTime/(60.0*60.0)));
 var distRemain = bPCT/(bPCTStart-bPCT)*dta;
 
 if (distRemain<0) distRemain=0;
 if (distRemain>1000) distRemain=0;
+if (distRemain!=distRemain) distRemain=0;
 
-infoLabel.text="Dist: "+distTravelled.toFixed(3)+" Miles   Avg: "+dta.toFixed(1)+" MPH"
-batteryLabel.text="Battery: "+(bPCT).toFixed(1)+"%   Est: "+distRemain.toFixed(0)+" Miles"
+infoLabel.text="Dist: "+distTravelled.toFixed(1)+" Miles      Avg: "+dta.toFixed(1)+" MPH"
+batteryLabel.text="Battery: "+(bPCT).toFixed(1)+"%      Est: "+distRemain.toFixed(1)+" Miles"
+
+ampLabel.text="Amps: "+cAmps.toFixed(1);
+cAmps+=(tAmps-cAmps)*0.5;
 }
 }
 
@@ -745,7 +753,7 @@ property var time: stime
 property var rx : parent.width
 property var ry : parent.height
 property var down:0.0001
-fragmentShader: roundrectvgrad
+fragmentShader: polepos
 }
 }
 ColumnLayout
@@ -1097,4 +1105,49 @@ if (d<4.0) {c=1.5;c2=0.0;}
 c+=down*4.0;
 gfc=vec4((vec3(0.2, 0.2, 0.2)*c+vec3(0.0,1.8,0.0)*c2)*a,a);
 }"
+property var polepos:shdr+"// https://www.glslsandbox.com/e#109581.0
+vec3 road(vec3 p)
+{
+vec3 c1=vec3(0.1,0.9,0.1);
+vec3 c2=vec3(0.1,0.6,0.1);
+float a=time;
+float k=sin(0.2*a);
+p.x *=p.x-=.05*k*k*k*p.y*p.y;
+if(abs(p.x)<1.0)
+{
+c1=vec3(0.9,0.1,0.1);
+c2=vec3(0.9,0.9,0.9);
+}
+if(abs(p.x)<.8)
+{
+c1=vec3(0.5,0.5,0.5);
+c2=vec3(0.5,0.5,0.5);
+}
+if(abs(p.x)<0.002)
+{
+c1=vec3(0.5,0.5,0.5);
+c2=vec3(0.9,0.9,0.9);
+}
+float t=time*5.0;
+float v=pow(sin(0.0),20.0);
+float r=fract(p.y+t);
+float b=dot(p,p)*0.005;
+vec3 g=mix(c1,c2,smoothstep(0.25-b*0.25,0.25+b*0.25,r)*smoothstep(0.75+b*0.25,0.75-b*0.25,r));
+return g;
+}
+
+void main( void )
+{
+vec2 res=vec2(rx,ry)/ry;
+vec2 uv=vec2(1.0,-1.0)*(tc*2.0-1.0);
+vec3 p=vec3(uv.x/abs(uv.y),1.0/abs(uv.y),step(0.0,uv.y)*2.0-1.0);
+vec3 c=0.25*mix(road(p),mix(vec3(1.0,1.0,1.0),vec3(0.1,0.7,1.0),uv.y),step(.0,p.z));
+vec2 ss=(tc-0.5)*vec2(rx,ry);
+float r=min(min(15.0,rx/2.0),ry/2.0);
+float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+float a=smoothstep(0.5-1.0,0.5+1.0,d);
+if (d<4.0) c=vec3(0.5);
+gfc=vec4(c*a,a);
+}
+"
 }
