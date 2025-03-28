@@ -69,6 +69,9 @@ The top two big MPH labels are target speed and actual speed.
 
 Accel is a divider for how many pedal rotations to get to max speed. This is linked to max speed, 20mph max speed takes 2x pedal rotations compared to 10mph e.t.c. Currently it's set to 5 full pedal rotations to get to 10mph if this slider is set to 1 and it would be 2.5 full pedal rotations to get to 10mph jf this slider is set to 2 e.t.c.
 
+Use the "Slide to enable" slider to make the system Active. Unslide it to deactivate it - this is here because a cruise system can be dangerous, even when just
+walking the bike around - if it triggers even at very low speed it can push the handlebars in a wall and easily break the bones in your hand e.t.c.
+
 Panic button STOPS EVERYTHING!
 
 The curve window - shows the parametric position to the max mph set. i.e. the position of the "Virtual Throttle". Click on that to select between 3 different Curves: Fast in,Linear and Slow In.
