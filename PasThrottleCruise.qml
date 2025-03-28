@@ -21,10 +21,10 @@ property Commands mCommands: VescIf.commands()
 property ConfigParams mMcConf: VescIf.mcConfig()
 Component.onCompleted:
 {
-wheelDiameter=mMcConf.getParamDouble("si_wheel_diameter")*39.3701;
-wheelDiameter=clamp(wheelDiameter,20,30);
+wheelDiameter=clamp(mMcConf.getParamDouble("si_wheel_diameter")*39.3701,20,30);
 minBat=mMcConf.getParamDouble("l_min_vin")
 maxBat=84
+
 }
 
 property var batcharge:[60,61.2,62.4,63.6,64.8,66.0,67.2,68.4,69.6,70.8,72,73.2,74.4,75.6,76.8,78,79.2,80.4,81.6,82.8,84]
@@ -38,7 +38,10 @@ if (v>=batcharge[a]) i=a;
 return (i+((v-batcharge[i])/(batcharge[i+1]-batcharge[i])))*5;
 }
 
+property var maxes:[2,3,4]
+property var accels:[0.01,0.5,0.75]
 property var curveIdx:1.0
+
 property var colours: [Qt.vector3d(0,0,0),Qt.vector3d(0,0,0.5),Qt.vector3d(0.5,0,0),Qt.vector3d(0,0,0.0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.5,0),Qt.vector3d(0,0,0),Qt.vector3d(0.5,0.25,0),Qt.vector3d(0,0,0),Qt.vector3d(0.0,0.0,0),Qt.vector3d(0.05,0.05,0.05),Qt.vector3d(0.15,0.15,0.15),Qt.vector3d(0.1,0.1,0.2),Qt.vector3d(0.1,0.1,0.2)]
 property var colourIdx:0
 
@@ -81,12 +84,12 @@ property var tERPM: 0
 property var aERPM: 0
 property var ps:-1000000
 property var zero: 0.0
-
+property var pedalDelta:0
+property var armed:true
+property var trackpos:0
 function clamp(v,min,max)
 {
-if (v<min) v=min;
-if (v>max) v=max;
-return v;
+return Math.min(Math.max(v,min),max);
 }
 
 function curveMap(v)
@@ -100,7 +103,7 @@ return clamp(res,0,1);
 
 function updateMotor()
 {
-aERPM+=(tERPM-aERPM);
+aERPM+=(tERPM-aERPM)*1.0;
 mCommands.setRpm(Math.round(clamp(aERPM,0,100000)))
 }
 
@@ -126,7 +129,7 @@ function buttonActive(idx)
 {
 for (var a=0;a<8;a++)
 if (idx==a )speedButtons[a].Material.background= "#008f00"
-else        speedButtons[a].Material.background= "#404040"
+else        speedButtons[a].Material.background= "#202020"
 }
 
 Connections
@@ -141,14 +144,11 @@ var pp2=dv.getUint8(2)
 var pp3=dv.getUint8(3)
 pCount= (pp1+(pp2*256)+(pp3*256*256))-(256*256*256/2)
 
-var fullthrottle=(5*96*(maxMPH/10))/accelSlider.value
-
-if (!bikeLocked && brakesTested==true)
+var fullthrottle=(5*96*(maxMPH/10))/accels[curveIdx]
+if (!bikeLocked && brakesTested==true && lockslider.active)
 {
 if (ps==-1000000)
 ps=pCount;
-var pedalDelta=0;
-
 pedalDelta= (pCount-ps)/fullthrottle;
 if (pedalDelta<0)
 {
@@ -160,6 +160,7 @@ if (pedalDelta>1)
 pedalDelta=1;
 ps=pCount-(fullthrottle)
 }
+if (pedalDelta<0.001) pedalDelta=0;
 
 param1=pedalDelta;
 var mph=curveMap(pedalDelta)*(maxMPH-0.75);
@@ -168,6 +169,12 @@ if (mph>0.05) mph+=0.75;
 if (pedalDelta>0) plV=false; else plV=true;
 tERPM=convMPHtoERPM(mph)
 targetLabel.text=convERPMtoMPH(tERPM).toFixed(1)+"  <MPH>"
+if (pasButton.active && pRPM<1)
+{
+ tERPM=0;
+ps=pCount
+}
+
 }
 }
 
@@ -175,7 +182,6 @@ targetLabel.text=convERPMtoMPH(tERPM).toFixed(1)+"  <MPH>"
 function onValuesReceived(values, mask)
 {
 mRPM=values.rpm
-
 if (mRPM>1)
 {
 accelSlider.enabled=false;
@@ -204,6 +210,7 @@ speedLabel.color="#ffffff"
 
 if (values.kill_sw_active)
 {
+setactive(false)
 ps=pCount
 aERPM=0
 tERPM=0
@@ -231,8 +238,6 @@ bPCT = batPercent(values.v_in);
 if (bPCTStart==0)
     bPCTStart=bPCT
 
-
-
 if (values.fault_str!="FAULT_CODE_NONE")
 {
 errorLabel.color="#ffff00"
@@ -240,7 +245,6 @@ errorLabel.text=values.fault_str;
 eV=true;
 }
 }
-
 }
 
 anchors.fill: parent
@@ -256,6 +260,11 @@ ps=pCount
 cV=false
 pV=true
 pwField.text=""
+
+lockslider.value=0;
+lockslider.active=false;
+lockslider.lslabel.text="Slide to enable"
+lockslider.lslabel.color="#808080"
 bikeLocked=true;
 }
 }
@@ -335,21 +344,22 @@ updateMotor()
 mCommands.getValues()
 mCommands.sendAlive()
 }
+
 }
 
 Timer {
 id: gfxTimer
-interval: 50
+interval: 16
 repeat: true
 running: true
 onTriggered:
 {
 stime+=interval/1000.0;
+trackpos+=curveMap(pedalDelta);
 if (mRPM>1)
     mTime+=gfxTimer.interval/1000
 
-
-if (!bikeLocked)
+if (!bikeLocked )
 {
 totalTime=totalTime+interval/1000.0
 tripLabel.text =  "Time: "+Qt.formatDateTime(new Date(),"hh:mm ")+"       Trip: "+fmtstr(Math.floor(totalTime/(60*60)))+":"+fmtstr(Math.floor(totalTime/60)%60)+":"+fmtstr(Math.floor(totalTime)%60)
@@ -371,6 +381,10 @@ cAmps+=(tAmps-cAmps)*0.5;
 }
 }
 
+function setactive(v)
+{
+}
+
 Rectangle
 {
 id: background
@@ -380,8 +394,35 @@ color: "#000000"
 
 ColumnLayout
 {
-id: gaugeColumn
 anchors.fill: parent
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+GroupBox {
+Layout.fillWidth: true
+Layout.fillHeight: true
+//anchors.fill: parent
+//height:1500
+
+visible : pV
+Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down: zero
+property var sc: colours[colourIdx]
+property var ec: colours[colourIdx+1]
+fragmentShader: roundrectvgrad
+}
+}
+
 RowLayout
 {
 Layout.fillHeight: true
@@ -414,6 +455,7 @@ onAccepted: _onEnterPressed()
 }
 }
 
+}
 GroupBox {
 Layout.fillWidth: true
 visible : cV
@@ -435,71 +477,12 @@ property var ec: colours[colourIdx+1]
 fragmentShader: roundrectvgrad
 }
 }
+
 ColumnLayout
 {
 anchors.fill: parent
 RowLayout
 {
-Layout.fillHeight: true
-Layout.fillWidth: true
-Button
-{
-Layout.fillWidth: true
-id: hornbutton
-text: "Horn"
-font.pointSize : 20
-enabled:false
-onClicked:
-{
-}
-background:Rectangle
-{
-layer.enabled: true;
-ShaderEffect
-{
-blending:false;
-width: parent.width
-height: parent.height
-property var source: parent
-property var time: stime
-property var rx : parent.width
-property var ry : parent.height
-property var down : (hornbutton.pressed+0.001)
-fragmentShader: roundrectvgrad
-}
-}
-}
-
-Button
-{
-Layout.fillWidth: true
-text: "Panic"
-font.pointSize : 20
-id:panicbutton
-onClicked:
-{
-tERPM=0;
-aERPM=0;
-ps=pCount
-}
-
-background:Rectangle
-{
-layer.enabled: true;
-ShaderEffect
-{
-blending:false
-width: parent.width
-height: parent.height
-property var source: parent
-property var time: stime
-property var rx : parent.width
-property var ry : parent.height
-property var down: panicbutton.pressed+0.001
-fragmentShader: hypnoshader
-}
-}
-}
 Button
 {
 Layout.fillWidth: true
@@ -530,6 +513,113 @@ fragmentShader: roundrectvgrad
 }
 }
 }
+
+// Custom Lock Slider
+Item {
+    id: lockslider
+    property double max:1
+    property double value:0
+    property double min:0
+    property bool active: false
+    width: 250;
+    height:40
+    enabled:mRPM<1
+    Layout.fillWidth: true
+    Rectangle {
+        width: parent.width
+            height: parent.height
+            radius: 0.25 * height
+            color: '#101010'
+    }
+    Rectangle {
+        id: pill
+        x: (parent.value - parent.min) / (parent.max - parent.min) * (lockslider.width - pill.width) // pixels from value
+        width: parent.height*2;
+        height: parent.height
+        radius: 0.25 * height
+        color:"#606060"
+    }
+    Label{
+    id: lslabel
+    Layout.fillWidth: true
+    text:"Slide to enable"
+    x:(parent.width-width)/2
+    y:(parent.height-height)/2
+    font.pointSize : 26
+    color:"#808080"
+    }
+    MouseArea {
+        id: mouseArea
+        preventStealing: true
+        anchors.fill: parent
+        drag {
+        id :did
+            target:   pill
+            axis:     Drag.XAxis
+            maximumX: lockslider.width - pill.width
+            minimumX: 0
+        }
+        onReleased:
+            {
+            parent.value=pill.x/(width-pill.width);
+            if (parent.value!=1)
+            {
+            parent.value=0;
+            lslabel.text="Slide to enable"
+            lslabel.color="#808080"
+            lockslider.active=false;
+            ps=pCount
+            aERPM=0
+            tERPM=0
+            }
+            else
+            {
+            lslabel.text="Active";
+            lslabel.color="#00ff00"
+            lockslider.active=true;
+            ps=pCount
+            aERPM=0
+            tERPM=0
+            }
+            }
+    }
+}
+
+
+
+Layout.fillHeight: true
+Layout.fillWidth: true
+Button
+{
+Layout.fillWidth: true
+text: "Panic"
+font.pointSize : 20
+id:panicbutton
+onClicked:
+{
+tERPM=0;
+aERPM=0;
+ps=pCount
+}
+
+background:Rectangle
+{
+layer.enabled: true;
+ShaderEffect
+{
+blending:false
+width: parent.width
+height: parent.height
+property var source: parent
+property var time: stime
+property var rx : parent.width
+property var ry : parent.height
+property var down: panicbutton.pressed+0.001
+fragmentShader: hypnoshader
+}
+}
+}
+
 }
 }
 }
@@ -553,7 +643,8 @@ property var time: stime
 property var rx : parent.width
 property var ry : parent.height
 property var down:zero
-fragmentShader: roundrectvgrad
+property var p1 : trackpos;
+fragmentShader: polepos
 }
 }
 ColumnLayout
@@ -621,11 +712,12 @@ id:accelSlider
 Layout.fillWidth: true
 from: 0.01
 to: 1
-value: 0.15
+value: 0.5
 onValueChanged:
 {
 ps=pCount
 sliderLabel.text="Accel "+value.toFixed(2)
+accels[curveIdx]=value;
 }
 }
 Label
@@ -680,7 +772,7 @@ font.pointSize : 30
 GroupBox {
 Layout.fillWidth: true
 Layout.fillHeight: true
-visible : cV
+visible : cV && lockslider.active
 id: pedalMSG
 background:Rectangle
 {
@@ -701,12 +793,29 @@ fragmentShader: roundrectvgrad
 ColumnLayout
 {
 anchors.fill: parent
-
 RowLayout
 {
 Layout.fillHeight: true
 Layout.fillWidth: true
 Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
+
+Button
+{
+//Layout.fillWidth: true
+text: "PAS Mode"
+font.pointSize : 20
+id:pasButton
+property var active:false
+onClicked:
+{
+active=!active;
+if (active)
+Material.background="#008f00"
+else
+Material.background="#202020"
+
+}
+}
 Label {
 horizontalAlignment: Text.AlignHCenter
 id :statusLabel
@@ -752,8 +861,9 @@ property var source: parent
 property var time: stime
 property var rx : parent.width
 property var ry : parent.height
-property var down:0.0001
-fragmentShader: polepos
+property var down: zero
+property var p1 : curveMap(pedalDelta);
+fragmentShader: roundrectvgrad
 }
 }
 ColumnLayout
@@ -993,7 +1103,11 @@ Button
 id: curvebutton
 onClicked:
     {
+    if (mRPM<0.1)
+    {
     curveIdx=(curveIdx+1)%3;  ps=-1000000
+    accelSlider.value=accels[curveIdx];
+    }
     }
 x:mainbox.x+mainbox.width-mainbox.width/5
 y:mainbox.y+(mainbox.height-mainbox.width/5)/2
@@ -1019,6 +1133,7 @@ fragmentShader: curves
 }
 }
 }
+
 
 property var shdr : "varying highp vec2 qt_TexCoord0;
 uniform highp float time;
@@ -1096,11 +1211,12 @@ float a=smoothstep(0.5-1.0,0.5+1.0,d);
 vec2 p=tc*2.0-1.0;
 p.y=-p.y;
 float c=0.0;
-float dd=abs((curveMap((p.x/2.0)+0.5)*2.0-1.0)-p.y);
+float dd=((curveMap((p.x/2.0)+0.5)*2.0-1.0)-p.y);
 float fd=10.0/pow(rx,0.85);
-c=((1.0-smoothstep(0.0-fd,0.0+fd,dd))*10.0)+0.1;
+c=((1.0-smoothstep(0.0-fd,0.0+fd,abs(dd)))*10.0)+0.1;
 vec2 dp=vec2(p1*2.0-1.0,curveMap(p1)*2.0-1.0);
 float c2=pow(clamp(1.0-length(p-dp)*1.0,0.0,1.0),3.0);
+if (p.x<dp.x && dd>0.0) c+=0.9;
 if (d<4.0) {c=1.5;c2=0.0;}
 c+=down*4.0;
 gfc=vec4((vec3(0.2, 0.2, 0.2)*c+vec3(0.0,1.8,0.0)*c2)*a,a);
@@ -1110,8 +1226,7 @@ vec3 road(vec3 p)
 {
 vec3 c1=vec3(0.1,0.9,0.1);
 vec3 c2=vec3(0.1,0.6,0.1);
-float a=time;
-float k=sin(0.2*a);
+float k=sin(0.2*p1/15.0);
 p.x *=p.x-=.05*k*k*k*p.y*p.y;
 if(abs(p.x)<1.0)
 {
@@ -1128,7 +1243,7 @@ if(abs(p.x)<0.002)
 c1=vec3(0.5,0.5,0.5);
 c2=vec3(0.9,0.9,0.9);
 }
-float t=time*5.0;
+float t=p1/5.0;
 float v=pow(sin(0.0),20.0);
 float r=fract(p.y+t);
 float b=dot(p,p)*0.005;
