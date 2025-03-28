@@ -75,9 +75,7 @@ The curve window - shows the parametric position to the max mph set. i.e. the po
 
 Each curve also stores it's own accel slider setting - like a mini profile, handy!
 
-Horn button does nothing - no QML media libs connected.
-
-Gradient Display removed - no QML sensor libs connected.
+"PAS Mode" button - when active switches off cruise mode - i.e. it stops the motor if you stop peddling.
 
 MPH buttons set the maxium target speed.
 
