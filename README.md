@@ -89,6 +89,7 @@ As soon as the motor starts spinning all buttons and sliders are disabled - apar
 
 <img src="./Images/Animation.gif" width="300">
 
+
 # VESC
 
 So far my experience with VESC has been great - hats off to the developers for a really great slick system that enables you to tweak your ESC into whatever you want.
