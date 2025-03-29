@@ -48,7 +48,7 @@ property var colourIdx:0
 property var stime:0.0
 property var param1:0.0
 
-property var gr: (8*21.9*28.0/32.0)
+property var gr: (8*21.9*28.0/42.0)
 property var wheelDiameter: 0.0
 
 property var pw : "353838"
@@ -168,7 +168,7 @@ if (mph<=0.05)mph=0;
 if (mph>0.05) mph+=0.75;
 if (pedalDelta>0) plV=false; else plV=true;
 tERPM=convMPHtoERPM(mph)
-targetLabel.text=convERPMtoMPH(tERPM).toFixed(1)+"  <MPH>"
+
 if (pasButton.active && pRPM<1)
 {
  tERPM=0;
@@ -354,8 +354,11 @@ repeat: true
 running: true
 onTriggered:
 {
-stime+=interval/1000.0;
-trackpos+=curveMap(pedalDelta);
+stime=stime+interval/1000.0;
+if (stime>10) stime-=10;
+trackpos=trackpos+curveMap(pedalDelta);
+if (trackpos>10) trackpos-=10;
+targetLabel.text=maxMPH.toFixed(0)+"  MPH"
 if (mRPM>1)
     mTime+=gfxTimer.interval/1000
 
@@ -374,7 +377,7 @@ if (distRemain>1000) distRemain=0;
 if (distRemain!=distRemain) distRemain=0;
 
 infoLabel.text="Dist: "+distTravelled.toFixed(1)+" Miles      Avg: "+dta.toFixed(1)+" MPH"
-batteryLabel.text="Battery: "+(bPCT).toFixed(1)+"%      Est: "+distRemain.toFixed(1)+" Miles"
+batteryLabel.text="Bat: "+(bPCT).toFixed(1)+"%      Est: "+distRemain.toFixed(1)+" Miles"
 
 ampLabel.text="Amps: "+cAmps.toFixed(1);
 cAmps+=(tAmps-cAmps)*0.5;
@@ -878,7 +881,7 @@ Label {
 horizontalAlignment: Text.AlignHCenter
 id :infoLabel
 text: "Dist:"
-font.pointSize : 25
+font.pointSize : 30
 }
 }
 
@@ -891,8 +894,8 @@ Label {
 horizontalAlignment: Text.AlignHCenter
 id :batteryLabel
 color: "#ffff00"
-text: "Battery:"
-font.pointSize : 25
+text: "Bat:"
+font.pointSize : 30
 }
 }
 
@@ -905,7 +908,7 @@ Label {
 horizontalAlignment: Text.AlignHCenter
 id :tripLabel
 text: "Time: 00:00 Trip Time: 00:00:00"
-font.pointSize : 25
+font.pointSize : 30
 }
 }
 }
@@ -1076,7 +1079,7 @@ id: tirebutton
 text :"Wheel\n"+wheelDiameter.toFixed(1)+"\""
 font.pointSize : 16
 x:mainbox.x+mainbox.width/5-mainbox.width/6
-y:mainbox.y+(mainbox.height-mainbox.width/5)/2
+y:mainbox.y+(mainbox.height-mainbox.width/2)/2
 width:mainbox.width/6
 height:width
 visible: cV
@@ -1110,7 +1113,7 @@ onClicked:
     }
     }
 x:mainbox.x+mainbox.width-mainbox.width/5
-y:mainbox.y+(mainbox.height-mainbox.width/5)/2
+y:mainbox.y+(mainbox.height-mainbox.width/2)/2
 width:mainbox.width/6
 height:width
 visible: cV
