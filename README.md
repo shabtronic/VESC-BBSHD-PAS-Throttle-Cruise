@@ -48,7 +48,7 @@ Currently fine tunning and testing. Trying to work out some smooth values e.t.c.
 
 Testing to see if MPH and Battery estimator are correct.
 
-> [!CAUTION
+> [!CAUTION]
 > Absolutely do not use this out on the road - until you have Bench tested this thoroughly and are happy with how it works!
 > it's still "in-progress" and will take many weeks to iron out bugs and issues. Use this software at your own risk - the author
 > accepts no responsibility or liability for any damage or injuries incurred using this software.
