@@ -62,7 +62,8 @@ Slowly putting all the comments back in and refactoring towards a proper release
 ### Completed
 - Motor and Vesc Temp (this was a real pain - inside motor , the temp JST connector didn't have a working pin connection for the Temp sensor! - twas a old BAC855 cable). BBSHD temp sensor seems to be NTC 10k@25c - that setting is in "Motor Settings"->"General"->"Temperature"->"Motor Sensor Temperature Type". 
 - Slider lock
-- Pole position shader lol
+- Pole position shader
+- Nightrider shader
 - Extra buttons hidden with second password
 - RPM Curves and independant accel settings
 ### ToDo
