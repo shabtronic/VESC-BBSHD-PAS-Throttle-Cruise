@@ -50,7 +50,8 @@ Testing to see if MPH and Battery estimator are correct.
 
 > [!CAUTION]
 > Absolutely do not use this out on the road - until you have Bench tested this thoroughly and are happy with how it works!
-> it's still "in-progess" and will take many weeks to iron out bugs and issues.
+> it's still "in-progess" and will take many weeks to iron out bugs and issues. Use this software at your own risks - the author
+> accepts no responsibility or liability for any damage or injuries incurred using this software.
 
 Playing around with glES shaders - fun fun fun! Much easier to write complex GFX in gles than faff about with QML (which is great - but not for complex stuff)
 
