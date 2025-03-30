@@ -57,6 +57,15 @@ Playing around with glES shaders - fun fun fun! Much easier to write complex GFX
 
 Slowly putting all the comments back in and refactoring towards a proper release.
 
+## ToDo
+
+- Speed/Distance testing
+- More testing!!
+- Refactor
+- Serialize settings
+- Add Trip recording
+- Improve battery estimator
+  
 # Setting up BBSHD
 
 It's really beyond the scope of this software documentation at the moment.
