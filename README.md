@@ -61,7 +61,7 @@ Playing around with glES shaders - fun fun fun! Much easier to write complex GFX
 Slowly putting all the comments back in and refactoring towards a proper release.
 
 ## ToDo
-
+- front and rear gear input
 - Speed/Distance testing
 - More testing!!
 - Refactor
