@@ -45,7 +45,7 @@ Currently fine tunning and testing. Trying to work out some smooth values e.t.c.
 
 Testing to see if MPH and Battery estimator are correct.
 
-> [!CAUTION] Advises about risks or negative outcomes of certain actions.
+> [!CAUTION]
 > Absolutely do not use this out on the road. Bench testing only!
 
 Playing around with glES shaders - fun fun fun!
