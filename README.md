@@ -310,7 +310,7 @@ gfc=vec4(colour*alpha,alpha);
 ```
 Timer {
 id: motorpollTimer
-interval: 100 // 10hz - was 60hz - waaaay too much for BT - spammed the vesc and slow downs!
+interval: 100 // 100ms = 10hz - was 60hz - waaaay too much for BT - spammed the vesc and slow downs!
 repeat: true
 running: true
 onTriggered:
@@ -337,7 +337,7 @@ USB comms: the USB cable - is right next to the phase wires in the cable exit ho
 ```
 Timer {
 id: motorpollTimer
-interval: 100 // 10hz - was 60hz - waaaay too much for BT - spammed the vesc and slow downs!
+interval: 100 // 100ms = 10hz - was 60hz - waaaay too much for BT - spammed the vesc and slow downs!
 repeat: true
 running: true
 onTriggered:
