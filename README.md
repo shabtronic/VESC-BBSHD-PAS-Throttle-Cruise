@@ -49,7 +49,8 @@ Currently fine tunning and testing. Trying to work out some smooth values e.t.c.
 Testing to see if MPH and Battery estimator are correct.
 
 > [!CAUTION]
-> Absolutely do not use this out on the road. Bench testing only!
+> Absolutely do not use this out on the road - until you have Bench tested this thoroughly and are happy with how it works!
+> it's still "in-progess" and will take many weeks to iron out bugs and issues.
 
 Playing around with glES shaders - fun fun fun!
 
