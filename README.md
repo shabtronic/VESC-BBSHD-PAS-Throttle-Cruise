@@ -1,4 +1,4 @@
-# Safety Lecture
+# > [!CAUTION] Safety Lecture
 
 Before you even contemplate looking at this software - please read the following:
 
