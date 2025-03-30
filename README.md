@@ -92,6 +92,10 @@ Additional Info->Setup->Wheel diameter
 
 App settings->general->Kill Switch mode. (Mine is set to "ADC2 low")
 
+> [!CAUTION]
+> This only uses Wheel Diameter from the VESC app - does not read the gear ration - that's hardcoded at the moment
+>  Line 58 in the QML file : property var gr: (8*21.92*28/42)
+
 ## Brief UI description
 
 The top two big MPH labels are target speed and actual speed.
