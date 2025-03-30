@@ -175,9 +175,7 @@ Here's the code to read the BBSHD pedal encoder, using 4x reading at 1000hz and 
 
 # QML
 
-QML is really nice and simple to make UI's - java style coding - quick and simple.
-
-Sometimes QML code doesn't read the mMcConf proper and returns the wrong wheel size (which can be really dangerous on a system using the wheel size as the main variable for speed calculations).
+QML is really nice and simple to make UI's very quickly - java style coding - quick and simple.
 
 ```
 Component.onCompleted:
