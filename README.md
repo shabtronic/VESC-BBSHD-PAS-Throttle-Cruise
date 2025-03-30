@@ -65,7 +65,8 @@ Slowly putting all the comments back in and refactoring towards a proper release
 - Serialize settings
 - Add Trip recording
 - Improve battery estimator
-  
+- Throttle control - maybe!
+    
 # Setting up BBSHD
 
 It's really beyond the scope of this software documentation at the moment.
