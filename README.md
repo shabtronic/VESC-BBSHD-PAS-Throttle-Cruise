@@ -190,6 +190,7 @@ Here's the code to read the BBSHD pedal encoder, using 4x reading at 1000hz and 
 # QML
 
 QML is really nice and simple to make UI's very quickly - java style coding - quick and simple.
+It's far easier and quicker to write a full blown app in QML than native C and build into the firmware - iteration times are waaay to slow to rebuild the firmware every time and reflash your vesc.
 
 ```
 Component.onCompleted:
