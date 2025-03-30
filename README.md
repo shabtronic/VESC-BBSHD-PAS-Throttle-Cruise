@@ -338,7 +338,7 @@ In fact a single gear setup, is perfect with BBSHD - no messing with derailleurs
 
 High Voltage!!! That's also another key to BBSHD longevity - the higher the voltage the faster the motor can spin, also Higher voltage means less current and less "copper loses" for the same amount of power. Less current also has less wear on your batteries. So it's a win win situation all round!
 
-When your geared low the motor spends less time in the low rpm and needs less current to get higher rpm - which also uses less current. So it's potentially more
+When you gear low the motor spends less time in the low rpm and needs less current to get higher rpm - which also uses less current. So it's potentially more
 effcient. (Of course it's a lot more complex than that - as RPM increases, parasitic losses increasing and copper losses decrease so there's a balance to be reached.)
 
 so Gear low and Voltage high!!!
