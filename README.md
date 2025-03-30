@@ -19,6 +19,8 @@ Simple PAS system for a VESC controller and a BBSHD motor. Developed using a Fli
 This was made to remove the need for a throttle (illegal in the UK, or at least "muddy" legality status)
 
 Pas sensors are connected to RX and TX.
+> [!CAUTION]
+> You must setup your brakes correctly - else you'll have a hard time stopping the engine
 
 My brakes (NYK ZOOM HB-876-E MTB) are simple switches (2 pin connectors) rather than pots (3 pin connectors) - so a 10k resistor from 3.3v connected to ADC2 and then the brake switch from ADC2 to gnd - to make it work properly, no floating values or madness when the motor switches on e.t.c. NOTE - should be the reverse of this so when brakes get accidentally disconnected - vesc thinks the kill switch is on and can also test if brakes are connected or not e.t.c.
 
