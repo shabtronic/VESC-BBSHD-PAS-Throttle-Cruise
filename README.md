@@ -52,13 +52,9 @@ Testing to see if MPH and Battery estimator are correct.
 > Absolutely do not use this out on the road - until you have Bench tested this thoroughly and are happy with how it works!
 > it's still "in-progess" and will take many weeks to iron out bugs and issues.
 
-Playing around with glES shaders - fun fun fun!
+Playing around with glES shaders - fun fun fun! Much easier to write complex GFX in gles than faff about with QML (which is great - but not for complex stuff)
 
-Sadly had to remove most comments in code, get the file sizes down so I could upload to vesc flash e.t.c.
-
-Vesc compresses any QML code to fit onto the tiny amout of free flash space - Which I think it's around 5kb, Vesc Desktop tool has a "calculate size" on the QML page to show you the compressed size.
-
-You'll also need to setup your BBSHD properly for this to work.
+Slowly putting all the comments back in and refactoring towards a proper release.
 
 # Setting up BBSHD
 
