@@ -19,11 +19,16 @@ import Vedder.vesc.configparams 1.0
 Item {
 property Commands mCommands: VescIf.commands()
 property ConfigParams mMcConf: VescIf.mcConfig()
+
 Component.onCompleted:
 {
 wheelDiameter=clamp(mMcConf.getParamDouble("si_wheel_diameter")*39.3701,20,30);
 minBat=mMcConf.getParamDouble("l_min_vin")
 maxBat=84
+var xx=1.0
+
+
+
 
 }
 
@@ -34,7 +39,7 @@ function batPercent(v)
 v=clamp(v,60,84);
 var i=0;
 for (var a=0;a<20;a++)
-if (v>=batcharge[a]) i=a;
+    if (v>=batcharge[a]) i=a;
 return (i+((v-batcharge[i])/(batcharge[i+1]-batcharge[i])))*5;
 }
 
@@ -47,9 +52,11 @@ property var colourIdx:0
 
 property var stime:0.0
 property var param1:0.0
-
-property var gr: (8*21.9*28.0/42.0)
-property var wheelDiameter: 0.0
+// main gear ratio:
+// MotorPoles*InternalGearRatio*CrankGear/WheelGear
+// 8 motor poles 21.92 internal gear ratio 28t crank 42t wheel
+property var gr: (8*21.92*28/42)
+property var wheelDiameter: 29.0
 
 property var pw : "353838"
 property var pwextra : "353538"
@@ -103,7 +110,7 @@ return clamp(res,0,1);
 
 function updateMotor()
 {
-aERPM+=(tERPM-aERPM)*1.0;
+aERPM+=(tERPM-aERPM)*1.0; // LPF for extra smoothing - tho not currently used
 mCommands.setRpm(Math.round(clamp(aERPM,0,100000)))
 }
 
@@ -146,105 +153,113 @@ pCount= (pp1+(pp2*256)+(pp3*256*256))-(256*256*256/2)
 
 var fullthrottle=(5*96*(maxMPH/10))/accels[curveIdx]
 if (!bikeLocked && brakesTested==true && lockslider.active)
-{
-if (ps==-1000000)
-ps=pCount;
-pedalDelta= (pCount-ps)/fullthrottle;
-if (pedalDelta<0)
-{
-pedalDelta=0;
-ps=pCount
-}
-if (pedalDelta>1)
-{
-pedalDelta=1;
-ps=pCount-(fullthrottle)
-}
-if (pedalDelta<0.001) pedalDelta=0;
+    {
+    if (ps==-1000000)
+        ps=pCount;
+    pedalDelta= (pCount-ps)/fullthrottle;
+    if (pedalDelta<0)
+        {
+        pedalDelta=0;
+        ps=pCount
+        }
+    if (pedalDelta>1)
+        {
+        pedalDelta=1;
+        ps=pCount-(fullthrottle)
+        }
+    if (pedalDelta<0.001) pedalDelta=0;
+    param1=pedalDelta;
 
-param1=pedalDelta;
-var mph=curveMap(pedalDelta)*(maxMPH-0.75);
-if (mph<=0.05)mph=0;
-if (mph>0.05) mph+=0.75;
-if (pedalDelta>0) plV=false; else plV=true;
-tERPM=convMPHtoERPM(mph)
+    var mph=curveMap(pedalDelta)*(maxMPH-0.75);
 
-if (pasButton.active && pRPM<1)
-{
- tERPM=0;
-ps=pCount
-}
+    if (mph<=0.05)
+        mph=0;
+        else
+        mph+=0.75;
 
-}
+    if (pedalDelta>0) plV=false; else plV=true;
+    tERPM=convMPHtoERPM(mph)
+
+    if (pasButton.active && pRPM<1)
+        {
+        tERPM=0;
+        ps=pCount
+        }
+    }
+
 }
 
 
 function onValuesReceived(values, mask)
-{
-mRPM=values.rpm
-if (mRPM>1)
-{
-accelSlider.enabled=false;
-lockButton.enabled=false;
-enableButtons(false);
-pedalMSG.visible=false;
-}
-else
-{
-pedalMSG.visible=true;
-accelSlider.enabled=true;
-lockButton.enabled=true;
-enableButtons(true);
-}
+        {
+            mRPM=values.rpm
+            if (mRPM>1)
+            {
+                accelSlider.enabled=false;
+                lockButton.enabled=false;
+                enableButtons(false);
+                pedalMSG.visible=false;
+            }
+            else
+            {
+                pedalMSG.visible=true;
+                accelSlider.enabled=true;
+                lockButton.enabled=true;
+                enableButtons(true);
+            }
 
-tAmps=values.current_motor;
-if (tAmps<0) tAmps=0;
+            tAmps=values.current_motor;
+            if (tAmps<0)
+                tAmps=0;
 
-speedLabel.text=Math.abs(convERPMtoMPH(mRPM)).toFixed(1)+" MPH"
-rpmLabel.text="ERPM: "+values.rpm.toFixed(1)
+            speedLabel.text=Math.abs(convERPMtoMPH(mRPM)).toFixed(1)+" MPH"
 
-if (mRPM>0)
-speedLabel.color="#80ff80"
-else
-speedLabel.color="#ffffff"
+            rpmLabel.text="Vesc: "+values.temp_mos.toFixed(0)+"c   Motor: "+values.temp_motor.toFixed(0)+"c"
 
-if (values.kill_sw_active)
-{
-setactive(false)
-ps=pCount
-aERPM=0
-tERPM=0
-errorLabel.color="#ffff00"
-errorLabel.text="Braking!!"
-eV=true
-if (brakesTested==false)
-{
-brakesTested=true;
-cV=true;
-eV=false;
-}
-}
-else
-{
-if (brakesTested==true)
-{
-errorLabel.text=""
-eV=false;
-}
-}
 
-bVolts=values.v_in;
-bPCT = batPercent(values.v_in);
-if (bPCTStart==0)
-    bPCTStart=bPCT
+            if (mRPM>0)
+                speedLabel.color="#80ff80"
+                else
+                speedLabel.color="#ffffff"
 
-if (values.fault_str!="FAULT_CODE_NONE")
-{
-errorLabel.color="#ffff00"
-errorLabel.text=values.fault_str;
-eV=true;
-}
-}
+            if (values.kill_sw_active)
+            {
+                setactive(false)
+                ps=pCount
+                aERPM=0
+                tERPM=0
+                errorLabel.color="#ffff00"
+                errorLabel.text="Braking!!"
+                eV=true
+                if (brakesTested==false)
+                {
+                    brakesTested=true;
+                    cV=true;
+                    eV=false;
+                }
+            }
+            else
+            {
+                if (brakesTested==true)
+                {
+                    errorLabel.text=""
+                    eV=false;
+                }
+            }
+
+            bVolts=values.v_in;
+            bPCT = batPercent(values.v_in);
+            if (bPCTStart==0)
+                bPCTStart=bPCT
+
+            if (values.fault_str!="FAULT_CODE_NONE")
+            {
+                errorLabel.color="#ffff00"
+                errorLabel.text=values.fault_str;
+                eV=true;
+            }
+        }
+
 }
 
 anchors.fill: parent
@@ -263,7 +278,7 @@ pwField.text=""
 
 lockslider.value=0;
 lockslider.active=false;
-lockslider.lslabel.text="Slide to enable"
+lockslider.lslabel.text="Slide to Activate"
 lockslider.lslabel.color="#808080"
 bikeLocked=true;
 }
@@ -272,57 +287,57 @@ bikeLocked=true;
 
 function _onEnterPressed(exVent)
 {
-if (pwField.text.length==6)
-{
-if (pwField.text==pw)
-{
-cV=true
-exV=false;
-pV=false
-bikeLocked=false;
-if (maxMPH>15)
-{
-buttonActive(1);
-maxMPH=10;
-}
-}
-else
-{
-if (pwField.text==pwextra)
-{
-cV=true
-exV=true;
-pV=false
-bikeLocked=false;
-}
-else
-{
-cV=false;
-pV=false;
-lockTimer.interval = 30000;
-lockTimer.repeat = false;
-lockTimer.start();
-}
-}
-pwField.text=""
-}
-}
+        if (pwField.text.length==6)
+        {
+            if (pwField.text==pw)
+            {
+                cV=true
+                exV=false;
+                pV=false
+                bikeLocked=false;
+                if (maxMPH>15)
+                {
+                    buttonActive(1);
+                    maxMPH=10;
+                }
+            }
+            else
+            {
+                if (pwField.text==pwextra)
+                {
+                    cV=true
+                    exV=true;
+                    pV=false
+                    bikeLocked=false;
+                }
+                else
+                {
+                    cV=false;
+                    pV=false;
+                    lockTimer.interval = 30000;
+                    lockTimer.repeat = false;
+                    lockTimer.start();
+                }
+            }
+            pwField.text=""
+        }
+    }
 
 function fmtstr(x)
-{
-var temp="%1"
-temp=x.toFixed(0);
-for (;temp.length<2;)
-temp="0"+temp;
-return temp
-}
+    {
+        var temp="%1"
+        temp=x.toFixed(0);
+        for (;temp.length<2;)
+        temp="0"+temp;
+        return temp
+    }
 
 function changeMaxSpeed(newSpeed)
-{
-if (newSpeed>30) newSpeed=30;
-if (newSpeed<6) newSpeed=6;
-maxMPH=newSpeed
-}
+    {
+        if (newSpeed>30) newSpeed=30;
+        if (newSpeed<6) newSpeed=6;
+        maxMPH=newSpeed
+    }
 
 Timer {
 id: lockTimer
@@ -338,12 +353,12 @@ interval: 100 // 10hz
 repeat: true
 running: true
 onTriggered:
-{
-if (!bikeLocked && brakesTested)
-updateMotor()
-mCommands.getValues()
-mCommands.sendAlive()
-}
+        {
+            if (!bikeLocked && brakesTested)
+            updateMotor()
+            mCommands.getValues()
+            mCommands.sendAlive()
+        }
 
 }
 
@@ -353,36 +368,38 @@ interval: 16
 repeat: true
 running: true
 onTriggered:
-{
-stime=stime+interval/1000.0;
-if (stime>10) stime-=10;
-trackpos=trackpos+curveMap(pedalDelta);
-if (trackpos>10) trackpos-=10;
-targetLabel.text=maxMPH.toFixed(0)+"  MPH"
-if (mRPM>1)
-    mTime+=gfxTimer.interval/1000
+        {
+            stime=stime+interval/1000.0;
+            if (stime>10) stime-=10;
+            trackpos=trackpos+curveMap(pedalDelta);
+            if (trackpos>10) trackpos-=10;
+            targetLabel.text=maxMPH.toFixed(0)+"  MPH"
+            if (mRPM>1)
+            mTime+=gfxTimer.interval/1000
+            else
+            param1=0;
 
-if (!bikeLocked )
-{
-totalTime=totalTime+interval/1000.0
-tripLabel.text =  "Time: "+Qt.formatDateTime(new Date(),"hh:mm ")+"       Trip: "+fmtstr(Math.floor(totalTime/(60*60)))+":"+fmtstr(Math.floor(totalTime/60)%60)+":"+fmtstr(Math.floor(totalTime)%60)
-}
+            if (!bikeLocked )
+                {
+                totalTime=totalTime+interval/1000.0
+                tripLabel.text =  "Time: "+Qt.formatDateTime(new Date(),"hh:mm ")+"       Trip: "+fmtstr(Math.floor(totalTime/(60*60)))+":"+fmtstr(Math.floor(totalTime/60)%60)+":"+fmtstr(Math.floor(totalTime)%60)
+                }
 
-distTravelled+=convERPMtoMPH(mRPM)/(60.0*60.0*1000.0/gfxTimer.interval);
-var dta=(distTravelled/(mTime/(60.0*60.0)));
-var distRemain = bPCT/(bPCTStart-bPCT)*dta;
+            distTravelled+=convERPMtoMPH(mRPM)/(60.0*60.0*1000.0/gfxTimer.interval);
+            var dta=(distTravelled/(mTime/(60.0*60.0)));
+            var distRemain = bPCT/(bPCTStart-bPCT)*dta;
 
-if (distRemain<0) distRemain=0;
-if (distRemain>1000) distRemain=0;
-if (distRemain!=distRemain) distRemain=0;
+            if (distRemain<0) distRemain=0;
+            if (distRemain>1000) distRemain=0;
+            if (distRemain!=distRemain) distRemain=0;
 
-infoLabel.text="Dist: "+distTravelled.toFixed(1)+" Miles      Avg: "+dta.toFixed(1)+" MPH"
-batteryLabel.text="Bat: "+(bPCT).toFixed(1)+"%      Est: "+distRemain.toFixed(1)+" Miles"
+            infoLabel.text="Dist: "+distTravelled.toFixed(1)+" Miles      Avg: "+dta.toFixed(1)+" MPH"
+            batteryLabel.text="Bat: "+(bPCT).toFixed(1)+"%      Est: "+distRemain.toFixed(0)+" Miles"
 
-ampLabel.text="Amps: "+cAmps.toFixed(1);
-cAmps+=(tAmps-cAmps)*0.5;
-}
-}
+            ampLabel.text="Amps: "+cAmps.toFixed(1);
+            cAmps+=(tAmps-cAmps)*0.5;
+        }
+ }
 
 function setactive(v)
 {
@@ -545,7 +562,7 @@ Item {
     Label{
     id: lslabel
     Layout.fillWidth: true
-    text:"Slide to enable"
+    text:"Slide to Activate"
     x:(parent.width-width)/2
     y:(parent.height-height)/2
     font.pointSize : 26
@@ -568,7 +585,7 @@ Item {
             if (parent.value!=1)
             {
             parent.value=0;
-            lslabel.text="Slide to enable"
+            lslabel.text="Slide to Activate"
             lslabel.color="#808080"
             lockslider.active=false;
             ps=pCount
@@ -672,7 +689,7 @@ Layout.alignment: Qt.AlignHCenter|Qt.AlignVCenter
 Label {
 horizontalAlignment: Text.AlignHCenter
 id :ampLabel
-color: "#8080FF"
+color: "#FF8080"
 text:"Amps: 0"
 font.pointSize : 35
 }
@@ -699,7 +716,7 @@ Label {
 horizontalAlignment: Text.AlignHCenter
 id :rpmLabel
 color: "#8080FF"
-text: "ERPM: 0"
+text: "Vesc: 0c Motor: 0c"
 font.pointSize : 30
 }
 }
@@ -1139,133 +1156,133 @@ fragmentShader: curves
 
 
 property var shdr : "varying highp vec2 qt_TexCoord0;
-uniform highp float time;
-uniform highp float rx;
-uniform highp float ry;
-uniform highp float down;
-uniform highp float cidx;
-uniform highp vec3 sc;
-uniform highp vec3 ec;
-uniform highp float p1;
-#define tc qt_TexCoord0
-#define gfc gl_FragColor
-float sdBox(vec2 p,vec2 b )
-{
-vec2 d=abs(p)-b;
-return length(max(d,0.0))+min(max(d.x,d.y),0.0);
-}
+    uniform highp float time;
+    uniform highp float rx;
+    uniform highp float ry;
+    uniform highp float down;
+    uniform highp float cidx;
+    uniform highp vec3 sc;
+    uniform highp vec3 ec;
+    uniform highp float p1;
+    #define tc qt_TexCoord0
+    #define gfc gl_FragColor
+    float sdBox(vec2 p,vec2 b )
+    {
+        vec2 d=abs(p)-b;
+        return length(max(d,0.0))+min(max(d.x,d.y),0.0);
+    }
 "
 
 property var hypnoshader:shdr+"
 void main()
-{
-vec2 ss=(tc-0.5)*vec2(rx,ry);
-float r=min(min(10.0,rx/2.0),ry/2.0);
-float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
-float a=smoothstep(0.0-1.0,0.0+1.0,d);
-float t=(time*5.0+down*1234.0)/3.0;
-vec2 c=(tc*2.0-1.0)*vec2(rx/ry,1.0)/3.0;
-float s=(sin(sqrt(c.x*c.x+c.y*c.y)*10.0-(t*1.0))/sqrt(c.x*c.x+c.y*c.y))*0.5+0.5;
-vec3 co=vec3(c.x*0.5+0.5,0.0,c.y*0.25+0.85);
-if (d<2.0) {co+=vec3(0.5);s=1.0;}
-gfc=vec4(co*s*a,a);
-}"
+    {
+        vec2 ss=(tc-0.5)*vec2(rx,ry);
+        float r=min(min(10.0,rx/2.0),ry/2.0);
+        float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+        float a=smoothstep(0.0-1.0,0.0+1.0,d);
+        float t=(time*5.0+down*1234.0)/3.0;
+        vec2 c=(tc*2.0-1.0)*vec2(rx/ry,1.0)/3.0;
+        float s=(sin(sqrt(c.x*c.x+c.y*c.y)*10.0-(t*1.0))/sqrt(c.x*c.x+c.y*c.y))*0.5+0.5;
+        vec3 co=vec3(c.x*0.5+0.5,0.0,c.y*0.25+0.85);
+        if (d<2.0) {co+=vec3(0.5);s=1.0;}
+        gfc=vec4(co*s*a,a);
+    }"
 
 property var hscanner:shdr+"
 void main()
-{
-float t=time*5.0;
-vec2 c=(tc*2.0-1.0)*vec2(rx/ry,1.0)/3.0;
-float s=cos(t)*0.3+0.5;
-vec3 co=vec3(0.0);
-float cc=1.0-abs(s-tc.x)/0.2;
-cc=cc*(1.0-abs((tc.y-0.5))*2.0);
-if (abs(s-tc.x)<0.2)
-co=vec3(1.0,cc*cc*2.0,cc);
-gfc=vec4(co*cc,cc);
-}"
+    {
+        float t=time*5.0;
+        vec2 c=(tc*2.0-1.0)*vec2(rx/ry,1.0)/3.0;
+        float s=cos(t)*0.3+0.5;
+        vec3 co=vec3(0.0);
+        float cc=1.0-abs(s-tc.x)/0.2;
+        cc=cc*(1.0-abs((tc.y-0.5))*2.0);
+        if (abs(s-tc.x)<0.2)
+        co=vec3(1.0,cc*cc*2.0,cc);
+        gfc=vec4(co*cc,cc);
+    }"
 
 property var roundrectvgrad:shdr+"
 void main()
-{
-vec2 ss=(tc-0.5)*vec2(rx,ry);
-float r=min(min(15.0,rx/2.0),ry/2.0);
-float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
-float a=smoothstep(0.5-1.0,0.5+1.0,d);
-vec3 c=mix(sc,ec,tc.y);
-if (d<4.0) c+=0.04;
-c+=down;
-gfc=vec4(c*a,a);
-}"
+    {
+        vec2 ss=(tc-0.5)*vec2(rx,ry);
+        float r=min(min(15.0,rx/2.0),ry/2.0);
+        float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+        float a=smoothstep(0.5-1.0,0.5+1.0,d);
+        vec3 c=mix(sc,ec,tc.y);
+        if (d<4.0) c+=0.04;
+        c+=down;
+        gfc=vec4(c*a,a);
+    }"
 
 property var curves:shdr+"
 float curveMap(float v)
-{
-if (cidx==0.01) return (sin(pow(v,0.5))/0.84);
-if (cidx==1.01) return (v);
-return (sin(pow(v,2.0))/0.84);
-}
+    {
+        if (cidx==0.01) return (sin(pow(v,0.5))/0.84);
+        if (cidx==1.01) return (v);
+        return (sin(pow(v,2.0))/0.84);
+    }
 void main( void )
-{
-vec2 ss=(tc-0.5)*vec2(rx,ry);
-float r=min(min(15.0,rx/2.0),ry/2.0);
-float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
-float a=smoothstep(0.5-1.0,0.5+1.0,d);
-vec2 p=tc*2.0-1.0;
-p.y=-p.y;
-float c=0.0;
-float dd=((curveMap((p.x/2.0)+0.5)*2.0-1.0)-p.y);
-float fd=10.0/pow(rx,0.85);
-c=((1.0-smoothstep(0.0-fd,0.0+fd,abs(dd)))*10.0)+0.1;
-vec2 dp=vec2(p1*2.0-1.0,curveMap(p1)*2.0-1.0);
-float c2=pow(clamp(1.0-length(p-dp)*1.0,0.0,1.0),3.0);
-if (p.x<dp.x && dd>0.0) c+=0.9;
-if (d<4.0) {c=1.5;c2=0.0;}
-c+=down*4.0;
-gfc=vec4((vec3(0.2, 0.2, 0.2)*c+vec3(0.0,1.8,0.0)*c2)*a,a);
-}"
+    {
+        vec2 ss=(tc-0.5)*vec2(rx,ry);
+        float r=min(min(15.0,rx/2.0),ry/2.0);
+        float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+        float a=smoothstep(0.5-1.0,0.5+1.0,d);
+        vec2 p=tc*2.0-1.0;
+        p.y=-p.y;
+        float c=0.0;
+        float dd=((curveMap((p.x/2.0)+0.5)*2.0-1.0)-p.y);
+        float fd=10.0/pow(rx,0.85);
+        c=((1.0-smoothstep(0.0-fd,0.0+fd,abs(dd)))*10.0)+0.1;
+        vec2 dp=vec2(p1*2.0-1.0,curveMap(p1)*2.0-1.0);
+        float c2=pow(clamp(1.0-length(p-dp)*1.0,0.0,1.0),3.0);
+        if (p.x<dp.x && dd>0.0) c+=0.9;
+        if (d<4.0) {c=1.5;c2=0.0;}
+        c+=down*4.0;
+        gfc=vec4((vec3(0.2, 0.2, 0.2)*c+vec3(0.0,1.8,0.0)*c2)*a,a);
+    }"
 property var polepos:shdr+"// https://www.glslsandbox.com/e#109581.0
 vec3 road(vec3 p)
-{
-vec3 c1=vec3(0.1,0.9,0.1);
-vec3 c2=vec3(0.1,0.6,0.1);
-float k=sin(0.2*p1/15.0);
-p.x *=p.x-=.05*k*k*k*p.y*p.y;
-if(abs(p.x)<1.0)
-{
-c1=vec3(0.9,0.1,0.1);
-c2=vec3(0.9,0.9,0.9);
-}
-if(abs(p.x)<.8)
-{
-c1=vec3(0.5,0.5,0.5);
-c2=vec3(0.5,0.5,0.5);
-}
-if(abs(p.x)<0.002)
-{
-c1=vec3(0.5,0.5,0.5);
-c2=vec3(0.9,0.9,0.9);
-}
-float t=p1/5.0;
-float v=pow(sin(0.0),20.0);
-float r=fract(p.y+t);
-float b=dot(p,p)*0.005;
-vec3 g=mix(c1,c2,smoothstep(0.25-b*0.25,0.25+b*0.25,r)*smoothstep(0.75+b*0.25,0.75-b*0.25,r));
-return g;
-}
+    {
+        vec3 c1=vec3(0.1,0.9,0.1);
+        vec3 c2=vec3(0.1,0.6,0.1);
+        float k=sin(0.2*p1/15.0);
+        p.x *=p.x-=.05*k*k*k*p.y*p.y;
+        if(abs(p.x)<1.0)
+        {
+            c1=vec3(0.9,0.1,0.1);
+            c2=vec3(0.9,0.9,0.9);
+        }
+        if(abs(p.x)<.8)
+        {
+            c1=vec3(0.5,0.5,0.5);
+            c2=vec3(0.5,0.5,0.5);
+        }
+        if(abs(p.x)<0.002)
+        {
+            c1=vec3(0.5,0.5,0.5);
+            c2=vec3(0.9,0.9,0.9);
+        }
+        float t=p1/5.0;
+        float v=pow(sin(0.0),20.0);
+        float r=fract(p.y+t);
+        float b=dot(p,p)*0.005;
+        vec3 g=mix(c1,c2,smoothstep(0.25-b*0.25,0.25+b*0.25,r)*smoothstep(0.75+b*0.25,0.75-b*0.25,r));
+        return g;
+    }
 
 void main( void )
-{
-vec2 res=vec2(rx,ry)/ry;
-vec2 uv=vec2(1.0,-1.0)*(tc*2.0-1.0);
-vec3 p=vec3(uv.x/abs(uv.y),1.0/abs(uv.y),step(0.0,uv.y)*2.0-1.0);
-vec3 c=0.25*mix(road(p),mix(vec3(1.0,1.0,1.0),vec3(0.1,0.7,1.0),uv.y),step(.0,p.z));
-vec2 ss=(tc-0.5)*vec2(rx,ry);
-float r=min(min(15.0,rx/2.0),ry/2.0);
-float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
-float a=smoothstep(0.5-1.0,0.5+1.0,d);
-if (d<4.0) c=vec3(0.5);
-gfc=vec4(c*a,a);
-}
+    {
+        vec2 res=vec2(rx,ry)/ry;
+        vec2 uv=vec2(1.0,-1.0)*(tc*2.0-1.0);
+        vec3 p=vec3(uv.x/abs(uv.y),1.0/abs(uv.y),step(0.0,uv.y)*2.0-1.0);
+        vec3 c=0.25*mix(road(p),mix(vec3(1.0,1.0,1.0),vec3(0.1,0.7,1.0),uv.y),step(.0,p.z));
+        vec2 ss=(tc-0.5)*vec2(rx,ry);
+        float r=min(min(15.0,rx/2.0),ry/2.0);
+        float d=-(sdBox(ss,vec2(rx-r*2.0,ry-r*2.0)/2.0)-r);
+        float a=smoothstep(0.5-1.0,0.5+1.0,d);
+        if (d<4.0) c=vec3(0.5);
+        gfc=vec4(c*a,a);
+    }
 "
 }
