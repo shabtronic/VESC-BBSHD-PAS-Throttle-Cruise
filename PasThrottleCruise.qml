@@ -56,6 +56,7 @@ property var param1:0.0
 // MotorPoles*InternalGearRatio*CrankGear/WheelGear
 // 8 motor poles 21.92 internal gear ratio 28t crank 42t wheel
 property var gr: (8*21.92*28/42)
+// Wheel diameter in inches
 property var wheelDiameter: 29.0
 
 property var pw : "353838"
@@ -198,11 +199,11 @@ function onValuesReceived(values, mask)
                 accelSlider.enabled=false;
                 lockButton.enabled=false;
                 enableButtons(false);
-                pedalMSG.visible=false;
+                //pedalMSG.visible=false;
             }
             else
             {
-                pedalMSG.visible=true;
+               // pedalMSG.visible=true;
                 accelSlider.enabled=true;
                 lockButton.enabled=true;
                 enableButtons(true);
@@ -792,7 +793,7 @@ font.pointSize : 30
 GroupBox {
 Layout.fillWidth: true
 Layout.fillHeight: true
-visible : cV && lockslider.active
+visible : cV && lockslider.active && mRPM<1
 id: pedalMSG
 background:Rectangle
 {
@@ -842,7 +843,6 @@ id :statusLabel
 color: "#FFffC0"
 text: "       Pedal to Start       "
 font.pointSize : 30
-visible: cV && plV
 background:Rectangle
 {
 id:rect
@@ -934,7 +934,8 @@ font.pointSize : 30
 GroupBox {
 Layout.fillWidth: true
 Layout.fillHeight: true
-visible : cV
+id : groupButtons
+visible : cV && mRPM<1
 background:Rectangle
 {
 layer.enabled: true;
@@ -1191,14 +1192,15 @@ void main()
 property var hscanner:shdr+"
 void main()
     {
-        float t=time*5.0;
+        float t=time;
         vec2 c=(tc*2.0-1.0)*vec2(rx/ry,1.0)/3.0;
-        float s=cos(t)*0.3+0.5;
+        float s=cos(t*3.14159265)*0.45+0.45;
+
         vec3 co=vec3(0.0);
-        float cc=1.0-abs(s-tc.x)/0.2;
-        cc=cc*(1.0-abs((tc.y-0.5))*2.0);
+        float cc=1.0-abs(s-(sign(tc.x)*floor(abs(tc.x)*10.0)/10.0))/0.2;
+        //cc=cc*(1.0-abs((tc.y-0.5))*2.0);
         if (abs(s-tc.x)<0.2)
-        co=vec3(1.0,cc*cc*2.0,cc);
+        co=vec3(pow(cc,0.25),0.0,0.0);
         gfc=vec4(co*cc,cc);
     }"
 
