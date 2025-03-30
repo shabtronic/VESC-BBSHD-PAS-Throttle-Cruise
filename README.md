@@ -72,7 +72,7 @@ Slowly putting all the comments back in and refactoring towards a proper release
 - More testing!!
 - Refactor
 - Serialize settings
-- Add Trip recording
+- full Trip recording and viewable list
 - Improve battery estimator
 - Throttle control - maybe!
     
