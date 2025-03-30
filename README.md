@@ -35,7 +35,7 @@ You'll need to upload these two files to your VESC controller:
 
 - You need to set "App Settings"->"General"->"App to use" to "Custom User app" - then press the "Write app configuration" button
  
-- Then on your android phone when the Vesc app connects - a eventually (can take 30secs vesc controller has to send the QML to your phone the first time) "App UI" tab will appear with the UI for this system
+- Then on your android phone when the Vesc app connects - a eventually (can take 30secs vesc controller has to send the QML to your phone the first time you use that app) "App UI" tab will appear with the UI for this system
 
 - Nothing will happen or work if your android Vesc app isn't running and connected to your Vesc controller.
 
