@@ -3,7 +3,7 @@
 > [!CAUTION]
 > Before you even contemplate looking at this software - please read the following:
 
-he BBSHD motor is exceptionally powerful (2.5kW, equivalent to 3.3HP). In situations with low gearing, it can easily overpower the rider, potentially leading to dangerous situations such as being pulled into traffic. This system utilizes a PID-based setRpm() function, which attempts to match the user-defined speed by increasing power output. This can be hazardous as the system will attempt to achieve the set speed regardless of obstacles, such as walls, cliffs, or other hazards.
+The BBSHD motor is exceptionally powerful (2.5kW, equivalent to 3.3HP). In situations with low gearing, it can easily overpower the rider, potentially leading to dangerous situations such as being pulled into traffic. This system utilizes a PID-based setRpm() function, which attempts to match the user-defined speed by increasing power output. This can be hazardous as the system will attempt to achieve the set speed regardless of obstacles, such as walls, cliffs, or other hazards.
 
 Therefore, unless you possess a thorough understanding of this software, it is strongly advised to avoid its use. This software should be treated as 'life-critical' and developed with the utmost care and consideration for safety.
 
