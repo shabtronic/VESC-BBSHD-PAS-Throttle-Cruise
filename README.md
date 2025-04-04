@@ -133,6 +133,12 @@ The whole VESC project is a monumental body of work, it handles many types of mo
 
 # LISP
 
+STM Vescs have 128kb flash page for both QML and Lisp
+
+'''// The ESP32 partition table has 512k space for lisp scripts. The STM32
+// has one 128k flash page. Subtract 6 bytes for fw size and crc.'''
+https://github.com/vedderb/vesc_tool/blob/master/codeloader.cpp#L368C5-L369C70
+
 It's all brackets!!! lol - it's simplistic parser uses polish notation instead of infix - it's fun and interesting, very simple nothing to stress out over.
 
 Here's the code to read the BBSHD pedal encoder, using 4x reading at 1000hz and sending to QML at 10hz (takes 10-15% vesc cpu)
