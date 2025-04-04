@@ -209,8 +209,11 @@ Here's the code to read the BBSHD pedal encoder, using 4x reading at 1000hz and 
 
 # QML
 
+QML seems to have a 120kb size limit ```(    if (data.size() > (1024 * 120))```
+https://github.com/vedderb/vesc_tool/blob/master/codeloader.cpp#L767C1-L767C38 ).
+
 QML is really nice and simple to make UI's very quickly - java style coding - quick and simple.
-It's far easier and quicker to write a full blown app in QML than native C and build into the firmware - iteration times are waaay to slow to rebuild the firmware every time and reflash your vesc. QML seems to have a 120kb size limit (    if (data.size() > (1024 * 120))  https://github.com/vedderb/vesc_tool/blob/master/codeloader.cpp#L767C1-L767C38 ).
+It's far easier and quicker to write a full blown app in QML than native C and build into the firmware - iteration times are waaay to slow to rebuild the firmware every time and reflash your vesc. 
 
 ```
 Component.onCompleted:
