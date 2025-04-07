@@ -132,6 +132,10 @@ As soon as the motor starts spinning all buttons and sliders are disabled - apar
 So far my experience with VESC has been great - hats off to the developers for a really great slick system that enables you to tweak your ESC into whatever you want.
 The whole VESC project is a monumental body of work, it handles many types of motors and setups - and it costs nothing (apart from the phone apps) - it's well written and documented plus all the source code is available. Couldn't have asked for anything better or more - Impressive stuff.
 
+If you do use Vesc - please do contribute and or give a small donation - it's a massive project
+
+https://vesc-project.com/donations
+
 # LISP
 
 STM Vescs have 128kb flash page for both QML and Lisp
