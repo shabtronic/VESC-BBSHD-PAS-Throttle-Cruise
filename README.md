@@ -136,7 +136,7 @@ If you do use Vesc - please do contribute and or give a small donation
 
 https://vesc-project.com/donations
 
-Unoffical Discord server
+Unoffical Discord server - please not this is not a support forum for a paid commercial product, for that kind of support talk to the manufacturer of your vesc device.
 
 https://discord.gg/JgvV5NwYts
 
